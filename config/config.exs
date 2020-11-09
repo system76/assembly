@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :copy_cat,
+config :assembly,
   producer:
     {BroadwaySQS.Producer,
      queue_url: "",
@@ -17,6 +17,6 @@ config :logger, :console,
 
 config :appsignal, :config,
   active: false,
-  name: "Copy Cat"
+  name: "Assembly"
 
 import_config "#{Mix.env()}.exs"

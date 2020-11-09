@@ -1,4 +1,4 @@
-defmodule CopyCat.Broadway do
+defmodule Assembly.Broadway do
   use Broadway
   use Appsignal.Instrumentation.Decorators
 
@@ -7,7 +7,7 @@ defmodule CopyCat.Broadway do
   alias Broadway.Message
 
   def start_link(_opts) do
-    producer_module = Application.fetch_env!(:copy_cat, :producer)
+    producer_module = Application.fetch_env!(:assembly, :producer)
 
     Broadway.start_link(__MODULE__,
       name: __MODULE__,

@@ -1,16 +1,16 @@
 import Config
 
-producer_config =
-  "SQS_PRODUCER"
+config =
+  "CONFIG"
   |> System.fetch_env!()
   |> Jason.decode!()
 
-config :copy_cat,
+config :assembly,
   producer:
     {BroadwaySQS.Producer,
-     queue_url: producer_config["queue_url"],
+     queue_url: config["sqs_queue_url"],
      config: [
-       access_key_id: producer_config["access_key_id"],
-       secret_access_key: producer_config["secret_access_key"],
-       region: producer_config["region"]
+       access_key_id: config["sqs_access_key_id"],
+       secret_access_key: config["sqs_secret_access_key"],
+       region: config["sqs_region"]
      ]}
