@@ -57,7 +57,7 @@ defmodule Assembly.Inventory do
     end)
     |> Enum.each(fn {sku, new_count} ->
       Logger.debug("#{sku} count change to #{new_count}")
-      PubSub.broadcast(Assembly.InventoryPubSub, to_string(sku), new_count)
+      PubSub.broadcast(Assembly.InventoryPubSub, to_string(sku), {sku, new_count})
     end)
 
     {:noreply, new_counts}

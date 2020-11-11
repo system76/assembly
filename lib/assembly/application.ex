@@ -15,6 +15,7 @@ defmodule Assembly.Application do
       {Assembly.InventoryRepo, []},
       {Assembly.Repo, []},
 
+      {Assembly.Build, name: Assembly.Build},
       {Assembly.Inventory, name: Assembly.Inventory}
     ]
 
