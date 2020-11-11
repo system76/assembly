@@ -9,7 +9,13 @@ defmodule Assembly.Application do
 
   def start(_type, _args) do
     children = [
-      {Assembly.Broadway, []}
+      {Phoenix.PubSub, name: Assembly.InventoryPubSub},
+
+      {Assembly.Broadway, []},
+      {Assembly.InventoryRepo, []},
+      {Assembly.Repo, []},
+
+      {Assembly.Inventory, name: Assembly.Inventory}
     ]
 
     Logger.info("Starting Assembly")

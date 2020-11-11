@@ -10,6 +10,27 @@ config :assembly,
        region: "us-east-2"
      ]}
 
+config :assembly,
+  ecto_repos: [
+    Assembly.InventoryRepo,
+    Assembly.Repo
+  ]
+
+config :assembly, Assembly.InventoryRepo,
+  database: "inventory",
+  username: "system76",
+  password: "system76",
+  hostname: "localhost"
+
+config :assembly, Assembly.Repo,
+  database: "assembly",
+  username: "postgres",
+  password: "postgres",
+  hostname: "localhost"
+
+config :assembly,
+  excluded_picking_locations: []
+
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
   metadata: [:request_id],
