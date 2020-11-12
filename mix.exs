@@ -31,7 +31,10 @@ defmodule Assembly.MixProject do
       {:appsignal, "~> 1.0"},
       {:bottle, github: "system76/bottle", branch: "elixir"},
       {:broadway_sqs, "~> 0.6.0"},
+      {:cachex, "~> 3.3"},
+      {:elixir_uuid, "~> 1.2"},
       {:saxy, "~> 1.1"},
+      {:mox, "~> 1.0"},
       {:hackney, "~> 1.16"},
       {:jason, "~> 1.2", override: true},
       {:credo, "~> 1.3", only: [:dev, :test]}

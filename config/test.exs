@@ -1,4 +1,5 @@
 use Mix.Config
 
 config :assembly,
-  producer: {Broadway.DummyProducer, []}
+  producer: {Broadway.DummyProducer, []},
+  events: Assembly.MockEvents

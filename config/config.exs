@@ -8,7 +8,8 @@ config :assembly,
        access_key_id: "",
        secret_access_key: "",
        region: "us-east-2"
-     ]}
+     ]},
+  events: Assembly.Events
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
