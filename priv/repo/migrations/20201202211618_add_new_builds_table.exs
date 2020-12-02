@@ -14,7 +14,7 @@ defmodule Assembly.Repo.Migrations.AddNewBuildsTable do
     create table(:build_components) do
       add :build_id, references(:builds), null: false
       add :component_id, :integer, null: false
-      add :quantity, :integer, default: 1
+      add :quantity, :integer, null: false, default: 1
     end
   end
 end
