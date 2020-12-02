@@ -2,7 +2,6 @@ defmodule Assembly.Build do
   @moduledoc """
   Each process represents an active build watching for inventory changes and updating its status accordingly
   """
-
   use GenServer
 
   alias Assembly.{Builder, Components}

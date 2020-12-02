@@ -4,7 +4,7 @@ defmodule Assembly.Broadway do
 
   require Logger
 
-  alias Assembly.{Builder, Components}
+  alias Assembly.{Builds, Components}
   alias Broadway.Message
 
   def start_link(_opts) do
@@ -53,14 +53,12 @@ defmodule Assembly.Broadway do
   end
 
   defp handle_resource({:build_created, %{build: build}}) do
-    # TODO: Track build in DB
-    DynamicSupervisor.start_child(Assembly.BuildSupervisor, {Assembly.Build, build})
-    Builder.recalculate_statues()
+    Builds.new_build(build)
   end
 
   defp handle_resource({:component_availability_updated, availability_updated}) do
     %{id: component_id} = availability_updated.component
     Components.update_quantity_available(component_id, availability_updated.quantity)
-    Builder.recalculate_statues()
+    Builds.recalculate_statues()
   end
 end

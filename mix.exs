@@ -29,14 +29,19 @@ defmodule Assembly.MixProject do
   defp deps do
     [
       {:appsignal, "~> 1.0"},
-      {:bottle, github: "system76/bottle", branch: "elixir"},
+      {:bottle, github: "system76/bottle", branch: "elixir", sha: "b77590f"},
       {:broadway_sqs, "~> 0.6.0"},
       {:cachex, "~> 3.3"},
+      {:cowlib, "~> 2.9.0", override: true},
+      {:ecto_enum, "~> 1.4"},
+      {:ecto_sql, "~> 3.5"},
       {:elixir_uuid, "~> 1.2"},
-      {:saxy, "~> 1.1"},
-      {:mox, "~> 1.0"},
+      {:grpc, github: "elixir-grpc/grpc"},
       {:hackney, "~> 1.16"},
       {:jason, "~> 1.2", override: true},
+      {:mox, "~> 1.0"},
+      {:postgrex, "~> 0.15.7"},
+      {:saxy, "~> 1.1"},
       {:credo, "~> 1.3", only: [:dev, :test]}
     ]
   end
