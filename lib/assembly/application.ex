@@ -15,7 +15,7 @@ defmodule Assembly.Application do
       {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
       Assembly.Repo,
       {Cachex, cachex_opts()},
-      supervisor(GRPC.Server.Supervisor, [{Assembly.Endpoint, 50051}]),
+      supervisor(GRPC.Server.Supervisor, [{Assembly.Endpoint, 50_051}]),
       {Assembly.Broadway, []}
     ]
 
@@ -27,7 +27,6 @@ defmodule Assembly.Application do
 
   defp cachex_opts do
     if opts = Application.get_env(:assembly, :cachex_opts) do
-      IO.inspect(opts)
       opts
     else
       [
