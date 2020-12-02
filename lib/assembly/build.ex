@@ -25,9 +25,9 @@ defmodule Assembly.Build do
         not is_nil(quantity) and quantity >= quantity_needed
       end)
 
-    build = %Build{build | status: build_status(readyable?)}
-
-    Repo.update(build)
+    build
+    |> Build.changeset(%{status: build_status(readyable?)})
+    |> Repo.update()
 
     {:noreply, build}
   end
