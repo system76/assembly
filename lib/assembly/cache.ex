@@ -21,8 +21,11 @@ defmodule Assembly.Cache do
     :ignore
   end
 
-  def get(component_id),
-    do: Cachex.get(__MODULE__, component_id)
+  def get(component_id) do
+    with {:ok, nil} <- Cachex.get(__MODULE__, component_id) do
+      {:ok, 0}
+    end
+  end
 
   @impl true
   def interval,

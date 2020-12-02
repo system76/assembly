@@ -9,13 +9,7 @@ defmodule Assembly.Components do
     do: Cache.put(component_id, quantity)
 
   def quantity_available(component_id) do
-    case Cache.get(component_id) do
-      {:error, _reason} ->
-        # TODO: Handle errors
-        nil
-
-      {:ok, value} ->
-        value
-    end
+    {:ok, value} = Cache.get(component_id)
+    value
   end
 end

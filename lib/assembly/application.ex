@@ -12,12 +12,7 @@ defmodule Assembly.Application do
 
   def start(_type, _args) do
     children = [
-      {Assembly.Broadway, []},
-      # For populating the Cache we have a few options:
-      # 1. We can handle this ourselves
-      # 2. Investigate and possibly leverage Cachex's warming functionality
-      #   https://hexdocs.pm/cachex/reactive-warming.html#content
-      #   https://hexdocs.pm/cachex/proactive-warming.html#content
+      {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
       {Cachex,
        [
          name: Assembly.Cache,
@@ -26,7 +21,7 @@ defmodule Assembly.Application do
          ]
        ]},
       supervisor(GRPC.Server.Supervisor, [{Assembly.Endpoint, 50051}]),
-      {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one}
+      {Assembly.Broadway, []}
     ]
 
     Logger.info("Starting Assembly")
