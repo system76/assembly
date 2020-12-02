@@ -11,6 +11,8 @@ defmodule Assembly.Schemas.Build do
     field :hal_id, :integer
 
     has_many BuildComponent, :build_components
+
+    timestamps()
   end
 
   def changeset(%Build{} = build, params) do

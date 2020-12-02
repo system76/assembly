@@ -4,7 +4,7 @@ defmodule Assembly.Broadway do
 
   require Logger
 
-  alias Assembly.{Builds, Components}
+  alias Assembly.{Builds, Cache}
   alias Broadway.Message
 
   def start_link(_opts) do
@@ -37,7 +37,9 @@ defmodule Assembly.Broadway do
 
     Logger.metadata(request_id: request_id)
 
-    handle_resource(resource)
+    with {:error, reason} <- notify_handler(resource) do
+      Logger.error(reason)
+    end
 
     message
   end
@@ -52,13 +54,12 @@ defmodule Assembly.Broadway do
     [failed_message]
   end
 
-  defp handle_resource({:build_created, %{build: build}}) do
-    Builds.new_build(build)
+  defp notify_handler({:build_created, %{build: build}}) do
+    Builds.new(build)
   end
 
-  defp handle_resource({:component_availability_updated, availability_updated}) do
+  defp notify_handler({:component_availability_updated, availability_updated}) do
     %{id: component_id} = availability_updated.component
-    Components.update_quantity_available(component_id, availability_updated.quantity)
-    Builds.recalculate_statues()
+    Cache.update_quantity_available(component_id, availability_updated.quantity)
   end
 end

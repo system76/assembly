@@ -1,7 +1,15 @@
 use Mix.Config
 
 config :assembly,
-  producer: {Broadway.DummyProducer, []},
-  events: Assembly.MockEvents
+  cachex_opts: [name: Assembly.Cache],
+  events: Assembly.MockEvents,
+  producer: {Broadway.DummyProducer, []}
 
-onfig(:grpc, start_server: false)
+config :assembly, Assembly.Repo,
+  username: "postgres",
+  password: "postgres",
+  database: "assembly_test#{System.get_env("MIX_TEST_PARTITION")}",
+  hostname: "localhost",
+  pool: Ecto.Adapters.SQL.Sandbox
+
+config :grpc, start_server: false

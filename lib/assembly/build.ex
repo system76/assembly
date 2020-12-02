@@ -4,8 +4,9 @@ defmodule Assembly.Build do
   """
   use GenServer
 
-  alias Assembly.{Builder, Components}
-  alias Bottle.Assembly.V1.Build
+  require Logger
+
+  alias Assembly.{Cache, Repo, Schemas.Build}
 
   def start_link(%Build{} = build) do
     GenServer.start_link(__MODULE__, build)
@@ -17,22 +18,20 @@ defmodule Assembly.Build do
   end
 
   @impl true
-  def handle_cast(:determine_status, %Build{build_components: components, status: current_status} = build) do
+  def handle_cast(:determine_status, %{build_components: components} = build) do
     readyable? =
       Enum.all?(components, fn %{id: component_id, quantity: quantity_needed} ->
-        {:ok, quantity} = Components.quantity_available(component_id)
+        {:ok, quantity} = Cache.quantity_available(component_id)
         not is_nil(quantity) and quantity >= quantity_needed
       end)
 
     build = %Build{build | status: build_status(readyable?)}
 
-    if (current_status == :BUILD_STATUS_READY) ^^^ readyable? do
-      Builder.status_change(build, current_status)
-    end
+    Repo.update(build)
 
     {:noreply, build}
   end
 
-  defp build_status(true), do: :BUILD_STATUS_READY
-  defp build_status(false), do: :BUILD_STATUS_INCOMPLETE
+  defp build_status(true), do: :ready
+  defp build_status(false), do: :incomplete
 end

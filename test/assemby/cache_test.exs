@@ -3,36 +3,31 @@ defmodule Assembly.CacheTest do
 
   import Mox
 
-  alias Bottle.Inventory.Events.V1.ComponentAvailabilityRequested
-  alias Bottle.Inventory.V1.Component
+  alias Assembly.{Cache, MockEvents}
 
   setup :verify_on_exit!
 
   describe "execute/1" do
     test "send a request for all component availability" do
       expect(
-        Assembly.MockEvents,
-        :send_event,
-        fn {:component_availability_requested, %ComponentAvailabilityRequested{component: []}} ->
-          %ExAws.Operation{}
-        end
+        MockEvents,
+        :request_quantity_update,
+        fn -> :ok end
       )
 
-      Assembly.Cache.execute()
+      Cache.execute(:ignored_state)
     end
   end
 
   describe "fallback/1" do
     test "send a request for a specific component's availability" do
       expect(
-        Assembly.MockEvents,
-        :send_event,
-        fn {:component_availability_requested, %ComponentAvailabilityRequested{component: [%Component{id: 1}]}} ->
-          %ExAws.Operation{}
-        end
+        MockEvents,
+        :request_quantity_update,
+        fn [1] -> :ok end
       )
 
-      Assembly.Cache.fallback(1)
+      Cache.fallback(1)
     end
   end
 end

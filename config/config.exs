@@ -1,6 +1,9 @@
 use Mix.Config
 
 config :assembly,
+  ecto_repos: [Assembly.Repo],
+  events: Assembly.Events,
+  inventory_service: nil,
   producer:
     {BroadwaySQS.Producer,
      queue_url: "",
@@ -8,9 +11,7 @@ config :assembly,
        access_key_id: "",
        secret_access_key: "",
        region: "us-east-2"
-     ]},
-  events: Assembly.Events,
-  ecto_repos: [Assembly.Repo]
+     ]}
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

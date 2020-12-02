@@ -2,49 +2,30 @@ defmodule Assembly.Events do
   @moduledoc """
   Encapsulate resources in the message envelope and send via SQS
   """
-  @callback send_event(atom(), struct()) :: ExAws.Operation.t()
+  require Logger
 
-  alias Bottle.Assembly.Events.V1.BuildUpdated
-  alias Bottle.Inventory.V1.Component
-  alias Bottle.Inventory.Events.V1.ComponentAvailabilityRequested
+  alias Assembly.Cache
+  alias Bottle.Inventory.V1.{Component, ComponentAvailabilityListRequest, Stub}
 
-  def broadcast_build_update(build) do
-    build_updated = BuildUpdated.new(build: build)
-    send_event(:build_updated, build_updated)
-  end
+  @callback request_quantity_update() :: :ok
+  @callback request_quantity_update(list(integer())) :: :ok
 
   def request_quantity_update(component_ids \\ []) do
     components = Enum.map(component_ids, &Component.new(id: &1))
-    request = ComponentAvailabilityRequested.new(component: components)
-    send_event(:component_availability_requested, request)
+    request = ComponentAvailabilityListRequest.new(components: components)
+
+    with {:ok, channel} <- GRPC.Stub.connect(inventory_service_url(), interceptors: [GRPC.Logger.Client]),
+         {:ok, stream} <- Stub.component_availability_list(channel, request) do
+      Stream.each(stream, fn {:ok, %{available: quantity, component: %{id: component_id}}} ->
+        Cache.update_quantity_available(component_id, quantity)
+      end)
+
+      :ok
+    else
+      {:error, reason} ->
+        Logger.error(inspect(reason))
+    end
   end
 
-  def send_event(type, resource) do
-    bottled_message = encode(type, resource)
-
-    type
-    |> message_queue_url()
-    |> ExAws.SQS.send_message(bottled_message)
-    |> ExAws.request()
-  end
-
-  defp encode(type, resource) do
-    args = [
-      request_id: Keyword.get(Logger.metadata(), :request_id, nil),
-      resource: {type, resource},
-      source: "Assembly",
-      timestamp: DateTime.to_unix(DateTime.utc_now())
-    ]
-
-    args
-    |> Bottle.Core.V1.Bottle.new()
-    |> Bottle.Core.V1.Bottle.encode()
-    |> URI.encode()
-  end
-
-  defp message_queue_url(type) do
-    :hal
-    |> Application.get_env(:message_queues)
-    |> Keyword.get(type)
-  end
+  defp inventory_service_url, do: Application.get_env(:assembly, :inventory_service_url)
 end

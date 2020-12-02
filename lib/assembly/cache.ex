@@ -6,31 +6,31 @@ defmodule Assembly.Cache do
 
   use Cachex.Warmer
 
-  alias Assembly.Events
-
   @six_hours 60 * 6
 
   @impl true
   def execute(_state) do
-    Events.request_quantity_update()
+    events_module().request_quantity_update()
     :ignore
   end
 
   def fallback(component_id) do
-    Events.request_quantity_update([component_id])
+    events_module().request_quantity_update([component_id])
     :ignore
-  end
-
-  def get(component_id) do
-    with {:ok, nil} <- Cachex.get(__MODULE__, component_id) do
-      {:ok, 0}
-    end
   end
 
   @impl true
   def interval,
     do: :timer.minutes(@six_hours)
 
-  def put(component_id, quantity),
-    do: Cachex.put(__MODULE__, component_id, quantity)
+  def quantity_available(component_id) do
+    {:ok, value} = Cachex.get(__MODULE__, component_id)
+    if is_nil(value), do: 0, else: value
+  end
+
+  def update_quantity_available(component_id, quantity) do
+    Cachex.put(__MODULE__, component_id, quantity)
+  end
+
+  defp events_module, do: Application.get_env(:assembly, :events)
 end
