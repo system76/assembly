@@ -30,14 +30,14 @@ defmodule Assembly.Broadway do
   @impl true
   @decorate transaction(:queue)
   def handle_message(_, %Message{} = message, _context) do
-    %{resource: resource, request_id: request_id} =
+    bottle =
       message
       |> URI.decode()
       |> Bottle.Core.V1.Bottle.decode()
 
-    Logger.metadata(request_id: request_id)
+    Bottle.RequestId.read(:queue, bottle)
 
-    with {:error, reason} <- notify_handler(resource) do
+    with {:error, reason} <- notify_handler(bottle.resource) do
       Logger.error(reason)
     end
 

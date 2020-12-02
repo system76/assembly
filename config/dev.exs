@@ -1,6 +1,6 @@
 use Mix.Config
 
-config :Assembly, Assembly.Repo,
+config :assembly, Assembly.Repo,
   username: "postgres",
   password: "postgres",
   database: "assembly_dev",

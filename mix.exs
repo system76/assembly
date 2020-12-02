@@ -29,7 +29,7 @@ defmodule Assembly.MixProject do
   defp deps do
     [
       {:appsignal, "~> 1.0"},
-      {:bottle, github: "system76/bottle", branch: "elixir", sha: "008b650"},
+      {:bottle, github: "system76/bottle", branch: "elixir", sha: "63d3cf0"},
       {:broadway_sqs, "~> 0.6.0"},
       {:cachex, "~> 3.3"},
       {:cowlib, "~> 2.9.0", override: true},

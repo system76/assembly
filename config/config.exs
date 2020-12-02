@@ -3,7 +3,7 @@ use Mix.Config
 config :assembly,
   ecto_repos: [Assembly.Repo],
   events: Assembly.Events,
-  inventory_service: nil,
+  inventory_service_url: nil,
   producer:
     {BroadwaySQS.Producer,
      queue_url: "",
