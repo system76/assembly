@@ -10,7 +10,7 @@ defmodule Assembly.Schemas.Build do
     field :status, BuildStatusEnum
     field :hal_id, :integer
 
-    has_many BuildComponent, :build_components
+    has_many :build_components, BuildComponent
 
     timestamps()
   end

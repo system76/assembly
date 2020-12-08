@@ -18,18 +18,19 @@ defmodule Assembly.Build do
   end
 
   @impl true
-  def handle_cast(:determine_status, %{build_components: components} = build) do
+  def handle_cast(:determine_status, %{build_components: build_components} = build) do
     readyable? =
-      Enum.all?(components, fn %{id: component_id, quantity: quantity_needed} ->
-        {:ok, quantity} = Cache.quantity_available(component_id)
+      Enum.all?(build_components, fn %{component_id: component_id, quantity: quantity_needed} ->
+        quantity = Cache.quantity_available(component_id)
         not is_nil(quantity) and quantity >= quantity_needed
       end)
 
-    build
-    |> Build.changeset(%{status: build_status(readyable?)})
-    |> Repo.update()
+    {:ok, updated_build} =
+      build
+      |> Build.changeset(%{status: build_status(readyable?)})
+      |> Repo.update()
 
-    {:noreply, build}
+    {:noreply, updated_build}
   end
 
   defp build_status(true), do: :ready

@@ -12,14 +12,15 @@ defmodule Assembly.Builds do
 
   def new(%Bottle.Assembly.V1.Build{} = build) do
     with {:ok, new_build} <- create_build_and_components(build) do
-      start_children([new_build])
+      [result] = start_children([new_build])
+      result
     end
   end
 
   def load_builds do
     query =
       from b in Build,
-        join: c in assoc(b, :build_components),
+        left_join: c in assoc(b, :build_components),
         where: b.status != :built,
         preload: [build_components: c]
 
@@ -37,9 +38,8 @@ defmodule Assembly.Builds do
   defp build_status(:BUILD_STATUS_INCOMPLETE), do: :incomplete
   defp build_status(:BUILD_STATUS_READY), do: :ready
 
-  defp component_changeset(%{component: %{id: id}, quantity: quantity}) do
-    BuildComponent.changeset(%BuildComponent{}, %{component_id: id, quantity: quantity})
-  end
+  defp component_params(%{id: build_id}, %{component: %{id: id}, quantity: quantity}),
+    do: %{build_id: build_id, component_id: id, quantity: quantity}
 
   defp create_build_and_components(build) do
     params = %{
@@ -47,16 +47,22 @@ defmodule Assembly.Builds do
       status: build_status(build.status)
     }
 
-    build_component_changesets = Enum.all?(build.build_components, &component_changeset/1)
+    changeset = Build.changeset(%Build{}, params)
 
-    %Build{}
-    |> Build.changeset(params)
-    |> Ecto.Changeset.put_assoc(:build_components, build_component_changesets)
-    |> Repo.insert()
+    with {:ok, new_build} <- Repo.insert(changeset) do
+      params = Enum.map(build.build_components, &component_params(new_build, &1))
+      Repo.insert_all(BuildComponent, params)
+
+      {:ok, new_build}
+    end
   end
 
   defp start_children(builds) do
-    Enum.each(builds, &DynamicSupervisor.start_child(Assembly.BuildSupervisor, {Assembly.Build, &1}))
-    recalculate_statues()
+    Enum.map(builds, fn build ->
+      {:ok, pid} = DynamicSupervisor.start_child(Assembly.BuildSupervisor, {Assembly.Build, build})
+      GenServer.cast(pid, :determine_status)
+
+      {:ok, pid}
+    end)
   end
 end

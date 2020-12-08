@@ -2,11 +2,11 @@ defmodule Assembly.Repo.Migrations.AddNewBuildsTable do
   use Ecto.Migration
 
   def change do
-    StatusEnum.create_type()
+    BuildStatusEnum.create_type()
 
     create table(:builds) do
       add :hal_id, :integer, null: false
-      add :status, StatusEnum.type()
+      add :status, BuildStatusEnum.type()
 
       timestamps()
     end

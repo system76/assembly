@@ -10,7 +10,7 @@ defmodule Assembly.Schemas.BuildComponent do
     field :component_id, :integer
     field :quantity, :integer, default: 1
 
-    belongs_to Build, :build
+    belongs_to :build, Build
   end
 
   def changeset(%BuildComponent{} = build_component, params) do
