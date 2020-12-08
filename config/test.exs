@@ -8,8 +8,8 @@ config :assembly,
 config :assembly, Assembly.Repo,
   username: "postgres",
   password: "postgres",
-  database: "assembly_test#{System.get_env("MIX_TEST_PARTITION")}",
-  hostname: "localhost",
+  database: "assembly_test",
+  hostname: Map.get(System.get_env(), "DB_HOST", "localhost"),
   pool: Ecto.Adapters.SQL.Sandbox
 
 config :grpc, start_server: false
