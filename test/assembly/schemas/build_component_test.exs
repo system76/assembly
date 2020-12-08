@@ -11,7 +11,11 @@ defmodule Assembly.Schemas.BuildComponentTest do
       assert %{valid?: false} = BuildComponent.changeset(%BuildComponent{}, %{component_id: 1, quantity: 1})
 
       assert %{valid?: true} =
-               BuildComponent.changeset(%BuildComponent{}, %{build_id: 999, component_id: 1, quantity: 1})
+               BuildComponent.changeset(%BuildComponent{}, %{
+                 build_id: "f78151c3-2a27-47d6-99bb-51c455db2518",
+                 component_id: 1,
+                 quantity: 1
+               })
 
       assert %{valid?: true} =
                BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, component_id: 1, quantity: 1})

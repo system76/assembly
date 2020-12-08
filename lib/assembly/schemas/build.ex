@@ -6,6 +6,8 @@ defmodule Assembly.Schemas.Build do
   alias Assembly.Schemas.BuildComponent
   alias __MODULE__, as: Build
 
+  @foreign_key_type :binary_id
+  @primary_key {:id, :binary_id, autogenerate: true}
   schema "builds" do
     field :status, BuildStatusEnum
     field :hal_id, :integer

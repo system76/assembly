@@ -38,8 +38,17 @@ defmodule Assembly.Builds do
   defp build_status(:BUILD_STATUS_INCOMPLETE), do: :incomplete
   defp build_status(:BUILD_STATUS_READY), do: :ready
 
-  defp component_params(%{id: build_id}, %{component: %{id: id}, quantity: quantity}),
-    do: %{build_id: build_id, component_id: id, quantity: quantity}
+  defp component_params(%{id: build_id}, %{component: %{id: id}, quantity: quantity}) do
+    now = NaiveDateTime.truncate(NaiveDateTime.utc_now(), :second)
+
+    %{
+      build_id: build_id,
+      component_id: id,
+      quantity: quantity,
+      inserted_at: now,
+      updated_at: now
+    }
+  end
 
   defp create_build_and_components(build) do
     params = %{
