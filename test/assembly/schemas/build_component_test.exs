@@ -9,6 +9,7 @@ defmodule Assembly.Schemas.BuildComponentTest do
     test "returns an invalid changeset if missing required field `build_id` or not valid database fkey" do
       %Build{id: build_id} = insert(:build)
       assert %{valid?: false} = BuildComponent.changeset(%BuildComponent{}, %{component_id: 1, quantity: 1})
+
       assert %{valid?: true} =
                BuildComponent.changeset(%BuildComponent{}, %{build_id: 999, component_id: 1, quantity: 1})
 
