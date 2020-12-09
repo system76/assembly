@@ -29,9 +29,9 @@ defmodule Assembly.Broadway do
 
   @impl true
   @decorate transaction(:queue)
-  def handle_message(_, %Message{} = message, _context) do
+  def handle_message(_, %Message{data: data} = message, _context) do
     bottle =
-      message
+      data
       |> URI.decode()
       |> Bottle.Core.V1.Bottle.decode()
 
