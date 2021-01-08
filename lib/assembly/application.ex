@@ -8,14 +8,13 @@ defmodule Assembly.Application do
   require Logger
 
   import Cachex.Spec
-  import Supervisor.Spec
 
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
       Assembly.Repo,
       {Cachex, cachex_opts()},
-      supervisor(GRPC.Server.Supervisor, [{Assembly.Endpoint, 50_051}]),
+      {GRPC.Server.Supervisor, {Assembly.Endpoint, 50_051}},
       {Assembly.Broadway, []}
     ]
 
