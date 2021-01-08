@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :assembly, Assembly.Repo,
   username: "postgres",

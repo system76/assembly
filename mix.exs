@@ -46,6 +46,8 @@ defmodule Assembly.MixProject do
       {:ecto_enum, "~> 1.4"},
       {:ecto_sql, "~> 3.5"},
       {:elixir_uuid, "~> 1.2"},
+      {:ex_aws_sqs, "~> 3.2"},
+      {:ex_aws, "~> 2.1.6"},
       {:hackney, "~> 1.16"},
       {:jason, "~> 1.2", override: true},
       {:postgrex, "~> 0.15.7"},
