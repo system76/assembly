@@ -1,6 +1,9 @@
 use Mix.Config
 
 config :assembly,
+  ecto_repos: [Assembly.Repo],
+  events: Assembly.Events,
+  inventory_service_url: nil,
   producer:
     {BroadwaySQS.Producer,
      queue_url: "",
@@ -18,5 +21,7 @@ config :logger, :console,
 config :appsignal, :config,
   active: false,
   name: "Assembly"
+
+config :grpc, start_server: true
 
 import_config "#{Mix.env()}.exs"

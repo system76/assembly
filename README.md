@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>assembly</h1>
+  <h1>Assembly</h1>
   <h3>An assembly management microservice</h3>
   <br>
   <br>

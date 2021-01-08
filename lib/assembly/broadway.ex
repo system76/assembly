@@ -4,6 +4,7 @@ defmodule Assembly.Broadway do
 
   require Logger
 
+  alias Assembly.{Builds, Cache}
   alias Broadway.Message
 
   def start_link(_opts) do
@@ -28,7 +29,18 @@ defmodule Assembly.Broadway do
 
   @impl true
   @decorate transaction(:queue)
-  def handle_message(_, %Message{} = message, _context) do
+  def handle_message(_, %Message{data: data} = message, _context) do
+    bottle =
+      data
+      |> URI.decode()
+      |> Bottle.Core.V1.Bottle.decode()
+
+    Bottle.RequestId.read(:queue, bottle)
+
+    with {:error, reason} <- notify_handler(bottle.resource) do
+      Logger.error(reason)
+    end
+
     message
   end
 
@@ -39,6 +51,15 @@ defmodule Assembly.Broadway do
 
   @impl true
   def handle_failed([failed_message], _context) do
-    failed_message
+    [failed_message]
+  end
+
+  defp notify_handler({:build_created, %{build: build}}) do
+    Builds.new(build)
+  end
+
+  defp notify_handler({:component_availability_updated, availability_updated}) do
+    %{id: component_id} = availability_updated.component
+    Cache.update_quantity_available(component_id, availability_updated.quantity)
   end
 end

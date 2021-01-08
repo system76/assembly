@@ -20,6 +20,14 @@ jobs:
     container:
       image: elixir:1.10-alpine
 
+    services:
+      db:
+        image: postgres:11
+        ports: ["5432:5432"]
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v1
@@ -41,6 +49,8 @@ jobs:
 
       - name: Run Tests
         run: mix test
+        env:
+          DB_HOST: db
 
   Format:
     runs-on: ubuntu-latest
