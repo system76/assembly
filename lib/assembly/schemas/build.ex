@@ -12,7 +12,7 @@ defmodule Assembly.Schemas.Build do
     field :status, BuildStatusEnum
     field :hal_id, :integer
 
-    has_many :build_components, BuildComponent
+    has_many :build_components, BuildComponent, on_replace: :delete
 
     timestamps()
   end
@@ -21,5 +21,6 @@ defmodule Assembly.Schemas.Build do
     build
     |> cast(params, [:hal_id, :status])
     |> validate_required([:hal_id])
+    |> cast_assoc(:build_components)
   end
 end

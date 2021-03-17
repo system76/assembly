@@ -12,6 +12,7 @@ defmodule Assembly.Application do
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
+      {Registry, keys: :unique, name: Assembly.Registry},
       Assembly.Repo,
       {Cachex, cachex_opts()},
       {GRPC.Server.Supervisor, {Assembly.Endpoint, 50_051}},

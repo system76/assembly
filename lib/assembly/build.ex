@@ -17,6 +17,10 @@ defmodule Assembly.Build do
     {:ok, build}
   end
 
+  def handle_cast({:update_build, new_build}, _old_build) do
+    {:noreply, new_build}
+  end
+
   @impl true
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
     readyable? =

@@ -19,7 +19,11 @@ defmodule Assembly.BuildsTest do
       build = bottled_build()
       {:ok, pid} = Builds.new(build)
 
-      assert [%{hal_id: 345}] = Repo.all(Build)
+      assert [%{hal_id: 345, build_components: [%{component_id: 123}]}] =
+               Build
+               |> Repo.all()
+               |> Repo.preload(:build_components)
+
       %{active: new_active_count} = DynamicSupervisor.count_children(Assembly.BuildSupervisor)
       assert new_active_count == active_count + 1
 
@@ -60,6 +64,15 @@ defmodule Assembly.BuildsTest do
 
       assert %{status: :ready} = Repo.get(Build, build.id)
       DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid)
+    end
+  end
+
+  describe "update/1" do
+    test "updates a build" do
+      build = bottled_build()
+      {:ok, _pid} = Builds.new(build)
+      Builds.update(%{build | status: :BUILD_STATUS_BUILT})
+      assert %{active: 0} = DynamicSupervisor.count_children(Assembly.BuildSupervisor)
     end
   end
 end

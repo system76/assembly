@@ -58,6 +58,10 @@ defmodule Assembly.Broadway do
     Builds.new(build)
   end
 
+  defp notify_handler({:build_updated, %{build: build}}) do
+    Builds.update(build)
+  end
+
   defp notify_handler({:component_availability_updated, availability_updated}) do
     %{id: component_id} = availability_updated.component
     Cache.update_quantity_available(component_id, availability_updated.quantity)
