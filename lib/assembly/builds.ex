@@ -61,6 +61,7 @@ defmodule Assembly.Builds do
   end
 
   defp build_status(:BUILD_STATUS_BUILT), do: :built
+  defp build_status(:BUILD_STATUS_INPROGRESS), do: :inprogress
   defp build_status(:BUILD_STATUS_READY), do: :ready
   defp build_status(_), do: :incomplete
 
@@ -74,6 +75,8 @@ defmodule Assembly.Builds do
   defp build_params(build) do
     %{
       hal_id: build.id,
+      model: build.model,
+      order_id: to_string(build.order.id),
       status: build_status(build.status),
       build_components: Enum.map(build.build_components, &component_params/1)
     }

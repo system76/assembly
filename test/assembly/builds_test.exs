@@ -9,8 +9,16 @@ defmodule Assembly.BuildsTest do
 
   def bottled_build do
     component = Bottle.Inventory.V1.Component.new(id: 123)
+    order = Bottle.Fulfillment.V1.Order.new(id: 123)
     build_component = Bottle.Assembly.V1.Build.BuildComponent.new(component: component, quantity: 1)
-    Bottle.Assembly.V1.Build.new(id: 345, build_components: [build_component], status: :BUILD_STATUS_INCOMPLETE)
+
+    Bottle.Assembly.V1.Build.new(
+      id: 345,
+      build_components: [build_component],
+      model: "test",
+      order: order,
+      status: :BUILD_STATUS_INCOMPLETE
+    )
   end
 
   describe "new/1" do

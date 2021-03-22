@@ -10,7 +10,7 @@ defmodule Assembly.Server do
   def build_list(_request, stream) do
     query =
       from b in Schemas.Build,
-        where: b.status in [:ready, :incomplete]
+        where: b.status != :built
 
     query
     |> Repo.stream()
@@ -18,6 +18,7 @@ defmodule Assembly.Server do
   end
 
   defp protobuf_status(:built), do: :BUILD_STATUS_BUILT
+  defp protobuf_status(:inprogress), do: :BUILD_STATUS_INPROGRESS
   defp protobuf_status(:ready), do: :BUILD_STATUS_READY
   defp protobuf_status(_), do: :BUILD_STATUS_INCOMPLETE
 

@@ -40,7 +40,7 @@ defmodule Assembly.MixProject do
     [
       {:amqp, "~> 2.0", override: true},
       {:appsignal, "~> 1.0"},
-      {:bottle, github: "system76/bottle", ref: "aa69809"},
+      {:bottle, github: "system76/bottle", ref: "b3b78b6"},
       {:broadway_rabbitmq, "~> 0.6"},
       {:cachex, "~> 3.3"},
       {:cowlib, "~> 2.9.0", override: true},
