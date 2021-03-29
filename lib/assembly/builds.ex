@@ -12,8 +12,9 @@ defmodule Assembly.Builds do
 
   def new(%Bottle.Assembly.V1.Build{} = build) do
     with {:ok, new_build} <- create_build_and_components(build) do
-      [result] = start_children([new_build])
-      result
+      [{:ok, pid, _build}] = start_children([new_build])
+      GenServer.cast(pid, :determine_status)
+      {:ok, pid}
     end
   end
 
@@ -35,14 +36,7 @@ defmodule Assembly.Builds do
     end
   end
 
-  defp update_build_process(pid, %Build{status: :built}) do
-    DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid)
-  end
-
-  defp update_build_process(pid, %Build{} = build),
-    do: GenServer.cast(pid, {:updated_build, build})
-
-  def load_builds do
+  def start_builds do
     query =
       from b in Build,
         left_join: c in assoc(b, :build_components),
@@ -53,6 +47,13 @@ defmodule Assembly.Builds do
     |> Repo.all()
     |> start_children()
   end
+
+  defp update_build_process(pid, %Build{status: :built}) do
+    DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid)
+  end
+
+  defp update_build_process(pid, %Build{} = build),
+    do: GenServer.cast(pid, {:updated_build, build})
 
   def recalculate_statues do
     Assembly.BuildSupervisor
@@ -94,9 +95,7 @@ defmodule Assembly.Builds do
     Enum.map(builds, fn build ->
       {:ok, pid} = DynamicSupervisor.start_child(Assembly.BuildSupervisor, {Assembly.Build, build})
       Registry.register(Assembly.Registry, to_string(build.id), pid)
-      GenServer.cast(pid, :determine_status)
-
-      {:ok, pid}
+      {:ok, pid, build}
     end)
   end
 end

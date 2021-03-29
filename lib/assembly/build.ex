@@ -17,11 +17,16 @@ defmodule Assembly.Build do
     {:ok, build}
   end
 
+  @impl true
+  def handle_call(:component_list, _from, %{build_components: build_components} = build) do
+    {:reply, build_components, build}
+  end
+
+  @impl true
   def handle_cast({:update_build, new_build}, _old_build) do
     {:noreply, new_build}
   end
 
-  @impl true
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
     readyable? =
       Enum.all?(build_components, fn %{component_id: component_id, quantity: quantity_needed} ->

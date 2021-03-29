@@ -22,7 +22,12 @@ defmodule Assembly.Application do
     Logger.info("Starting Assembly")
 
     opts = [strategy: :one_for_one, name: Assembly.Supervisor]
-    Supervisor.start_link(children, opts)
+
+    with {:ok, pid} <- Supervisor.start_link(children, opts) do
+      Assembly.warmup()
+
+      {:ok, pid}
+    end
   end
 
   defp cachex_opts do
@@ -31,9 +36,6 @@ defmodule Assembly.Application do
     else
       [
         name: Assembly.Cache,
-        warmers: [
-          warmer(module: Assembly.Cache)
-        ],
         fallback: fallback(default: &Assembly.Cache.fallback/1)
       ]
     end
