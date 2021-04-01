@@ -28,6 +28,8 @@ defmodule Assembly.Build do
   end
 
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
+    Logger.info("Computing #{build.id} status")
+
     readyable? =
       Enum.all?(build_components, fn %{component_id: component_id, quantity: quantity_needed} ->
         quantity = Cache.quantity_available(component_id)

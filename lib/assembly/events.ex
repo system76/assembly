@@ -4,7 +4,7 @@ defmodule Assembly.Events do
   """
   require Logger
 
-  alias Assembly.Cache
+  alias Assembly.{Builds, Cache}
   alias Bottle.Inventory.V1.{Component, ComponentAvailabilityListRequest, Stub}
 
   @callback request_quantity_update() :: :ok
@@ -20,6 +20,8 @@ defmodule Assembly.Events do
       stream
       |> Stream.each(fn {:ok, resp} -> Cache.update_quantity_available(resp.component.id, resp.available) end)
       |> Stream.run()
+
+      Builds.recalculate_statues()
 
       :ok
     else
