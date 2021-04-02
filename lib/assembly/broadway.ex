@@ -55,10 +55,12 @@ defmodule Assembly.Broadway do
   end
 
   defp notify_handler({:build_created, %{build: build}}) do
+    Logger.info("Handling Build Created message")
     Builds.new(build)
   end
 
   defp notify_handler({:build_updated, %{build: build}}) do
+    Logger.info("Handling Build Updated message")
     Builds.update(build)
   end
 
