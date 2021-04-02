@@ -24,7 +24,7 @@ defmodule Assembly.Application do
     opts = [strategy: :one_for_one, name: Assembly.Supervisor]
 
     with {:ok, pid} <- Supervisor.start_link(children, opts) do
-      Assembly.warmup()
+      warmup()
 
       {:ok, pid}
     end
@@ -39,5 +39,11 @@ defmodule Assembly.Application do
         fallback: fallback(default: &Assembly.Cache.fallback/1)
       ]
     end
+  end
+
+  defp warmup do
+    :assembly
+    |> Application.get_env(:warmup)
+    |> apply([])
   end
 end

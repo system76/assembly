@@ -10,7 +10,7 @@ defmodule Assembly.Schemas.BuildComponent do
   @primary_key {:id, :binary_id, autogenerate: true}
 
   schema "build_components" do
-    field :component_id, :integer
+    field :component_id, :string
     field :quantity, :integer, default: 1
 
     belongs_to :build, Build

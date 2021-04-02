@@ -10,11 +10,11 @@ defmodule Assembly.Events do
 
   @callback broadcast_build_update(struct(), struct()) :: :ok
   @callback request_quantity_update() :: :ok
-  @callback request_quantity_update(list(integer())) :: :ok
+  @callback request_quantity_update(list()) :: :ok
 
   def broadcast_build_update(old, new) do
     message = BuildUpdated.new(old: Caster.cast(old), new: Caster.cast(new))
-    Bottle.publish(message, source: :assembly)
+    Bottle.publish(message, source: "Assembly")
   end
 
   def request_quantity_update(component_ids \\ []) do

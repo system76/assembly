@@ -4,7 +4,8 @@ config :assembly,
   ecto_repos: [Assembly.Repo],
   events: Assembly.Events,
   inventory_service_url: nil,
-  producer: {BroadwayRabbitMQ.Producer, queue: "", connection: []}
+  producer: {BroadwayRabbitMQ.Producer, queue: "", connection: []},
+  warmup: &Assembly.warmup/0
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",

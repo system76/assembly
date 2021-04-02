@@ -3,35 +3,30 @@ defmodule Assembly.Server do
 
   import Ecto.Query
 
-  alias Assembly.{Repo, Schemas}
-  alias Bottle.Assembly.V1.{Build, BuildListRequest, BuildListResponse}
+  alias Assembly.{Caster, Repo, Schemas}
+  alias Bottle.Assembly.V1.{BuildListRequest, BuildListResponse}
 
   @spec build_list(BuildListRequest.t(), GRPC.Server.Stream.t()) :: any
   def build_list(_request, stream) do
     query =
       from b in Schemas.Build,
-        where: b.status != :built
+        left_join: c in assoc(b, :build_components),
+        where: b.status != :built,
+        preload: [build_components: c]
 
     query
-    |> Repo.stream()
+    |> Repo.all()
     |> stream_results(stream)
   end
 
-  defp protobuf_status(:built), do: :BUILD_STATUS_BUILT
-  defp protobuf_status(:inprogress), do: :BUILD_STATUS_INPROGRESS
-  defp protobuf_status(:ready), do: :BUILD_STATUS_READY
-  defp protobuf_status(_), do: :BUILD_STATUS_INCOMPLETE
-
-  defp stream_results(repo, grpc_stream) do
-    Repo.transaction(fn ->
-      repo
-      |> Stream.each(&stream_result(&1, grpc_stream))
-      |> Stream.run()
-    end)
+  defp stream_results(results, grpc_stream) do
+    results
+    |> Stream.each(&stream_result(&1, grpc_stream))
+    |> Stream.run()
   end
 
-  defp stream_result(%Schemas.Build{hal_id: build_id, status: status}, stream) do
-    build = Build.new(id: to_string(build_id), status: protobuf_status(status))
+  defp stream_result(%Schemas.Build{} = build, stream) do
+    build = Caster.cast(build)
     response = BuildListResponse.new(build: build)
     GRPC.Server.send_reply(stream, response)
   end

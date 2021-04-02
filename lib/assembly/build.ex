@@ -6,7 +6,7 @@ defmodule Assembly.Build do
 
   require Logger
 
-  alias Assembly.{Cache, Caster, Events, Repo, Schemas.Build}
+  alias Assembly.{Cache, Repo, Schemas.Build}
 
   def start_link(%Build{} = build) do
     GenServer.start_link(__MODULE__, build)
@@ -51,6 +51,8 @@ defmodule Assembly.Build do
     not is_nil(quantity) and quantity >= quantity_needed
   end
 
+  defp events_module, do: Application.get_env(:assembly, :events)
+
   defp update_build(%{changes: changes}) when %{} == changes do
     :ignored
   end
@@ -58,7 +60,8 @@ defmodule Assembly.Build do
   defp update_build(changeset) do
     with {:ok, updated_build} <- Repo.update(changeset) do
       Logger.info("Broadcasting build #{updated_build.id} state change")
-      Events.broadcast_build_update(changeset.data, updated_build)
+      events_module().broadcast_build_update(changeset.data, updated_build)
+
       updated_build
     end
   end

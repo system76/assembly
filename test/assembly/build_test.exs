@@ -2,18 +2,23 @@ defmodule Assembly.BuildTest do
   use Assembly.DataCase
 
   import Assembly.Factory
+  import Mox
 
-  alias Assembly.{Cache, Schemas.Build}
+  alias Assembly.{Build, Cache, MockEvents, Schemas}
+
+  setup :verify_on_exit!
 
   describe "handle_cast/2" do
-    test "determines build status and updates database if changed" do
-      %{build: build} = build_component = insert(:build_component, component_id: 123, quantity: 1)
-      Cache.update_quantity_available(123, 1)
+    test ":determine_status updates database if changed" do
+      %{build: build} = build_component = insert(:build_component, component_id: "123", quantity: 1)
+      Cache.update_quantity_available("123", 1)
+
+      expect(MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
 
       assert {:noreply, %{status: :ready}} =
-               Assembly.Build.handle_cast(:determine_status, %{build | build_components: [build_component]})
+               Build.handle_cast(:determine_status, %{build | build_components: [build_component]})
 
-      assert %{status: :ready} = Repo.get(Build, build.id)
+      assert %{status: :ready} = Repo.get(Schemas.Build, build.id)
     end
   end
 end

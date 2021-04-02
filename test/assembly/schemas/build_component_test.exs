@@ -11,17 +11,17 @@ defmodule Assembly.Schemas.BuildComponentTest do
       assert %{valid?: false} = BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, quantity: 1})
 
       assert %{valid?: true} =
-               BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, component_id: 1, quantity: 1})
+               BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, component_id: "1", quantity: 1})
     end
 
     test "returns an invalid changeset if missing required field `quantity`" do
       %Build{id: build_id} = insert(:build)
 
       assert %{valid?: false} =
-               BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, component_id: 1, quantity: nil})
+               BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, component_id: "1", quantity: nil})
 
       assert %{valid?: true} =
-               BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, component_id: 1, quantity: 1})
+               BuildComponent.changeset(%BuildComponent{}, %{build_id: build_id, component_id: "1", quantity: 1})
     end
   end
 end
