@@ -1,14 +1,21 @@
 defmodule Assembly.Events do
   @moduledoc """
-  Encapsulate resources in the message envelope and send via SQS
+  Encapsulate sending messages over RPC and Rabbit
   """
   require Logger
 
-  alias Assembly.{Builds, Cache}
+  alias Assembly.{Builds, Cache, Caster}
+  alias Bottle.Assembly.V1.BuildUpdated
   alias Bottle.Inventory.V1.{Component, ComponentAvailabilityListRequest, Stub}
 
+  @callback broadcast_build_update(struct(), struct()) :: :ok
   @callback request_quantity_update() :: :ok
   @callback request_quantity_update(list(integer())) :: :ok
+
+  def broadcast_build_update(old, new) do
+    message = BuildUpdated.new(old: Caster.cast(old), new: Caster.cast(new))
+    Bottle.publish(message, source: :assembly)
+  end
 
   def request_quantity_update(component_ids \\ []) do
     components = Enum.map(component_ids, &Component.new(id: &1))

@@ -6,7 +6,7 @@ defmodule Assembly.Build do
 
   require Logger
 
-  alias Assembly.{Cache, Repo, Schemas.Build}
+  alias Assembly.{Cache, Caster, Events, Repo, Schemas.Build}
 
   def start_link(%Build{} = build) do
     GenServer.start_link(__MODULE__, build)
@@ -29,21 +29,37 @@ defmodule Assembly.Build do
 
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
     Logger.info("Computing #{build.id} status")
+    readyable? = Enum.all?(build_components, &components_available?/1)
 
-    readyable? =
-      Enum.all?(build_components, fn %{component_id: component_id, quantity: quantity_needed} ->
-        quantity = Cache.quantity_available(component_id)
-        not is_nil(quantity) and quantity >= quantity_needed
-      end)
-
-    {:ok, updated_build} =
+    updated_build =
       build
       |> Build.changeset(%{status: build_status(readyable?)})
-      |> Repo.update()
+      |> update_build()
 
     {:noreply, updated_build}
   end
 
   defp build_status(true), do: :ready
   defp build_status(false), do: :incomplete
+
+  defp components_available?(%{component_id: component_id, quantity: quantity_needed}) do
+    quantity =
+      component_id
+      |> to_string()
+      |> Cache.quantity_available()
+
+    not is_nil(quantity) and quantity >= quantity_needed
+  end
+
+  defp update_build(%{changes: changes}) when %{} == changes do
+    :ignored
+  end
+
+  defp update_build(changeset) do
+    with {:ok, updated_build} <- Repo.update(changeset) do
+      Logger.info("Broadcasting build #{updated_build.id} state change")
+      Events.broadcast_build_update(changeset.data, updated_build)
+      updated_build
+    end
+  end
 end
