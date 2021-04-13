@@ -28,7 +28,7 @@ defmodule Assembly.Build do
   end
 
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
-    Logger.info("Computing #{build.id} status")
+    Logger.info("Computing #{build.hal_id} status")
     readyable? = Enum.all?(build_components, &components_available?/1)
 
     updated_build =
@@ -59,7 +59,7 @@ defmodule Assembly.Build do
 
   defp update_build(changeset) do
     with {:ok, updated_build} <- Repo.update(changeset) do
-      Logger.info("Broadcasting build #{updated_build.id} state change")
+      Logger.info("Broadcasting build #{updated_build.hal_id} state change")
       events_module().broadcast_build_update(changeset.data, updated_build)
 
       updated_build
