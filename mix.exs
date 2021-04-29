@@ -54,7 +54,8 @@ defmodule Assembly.MixProject do
       {:saxy, "~> 1.1"},
       {:credo, "~> 1.4", only: [:dev, :test]},
       {:ex_machina, "~> 2.4", only: :test},
-      {:mox, "~> 1.0", only: :test}
+      {:mox, "~> 1.0", only: :test},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false}
     ]
   end
 
