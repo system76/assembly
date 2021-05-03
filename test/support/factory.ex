@@ -8,9 +8,10 @@ defmodule Assembly.Factory do
 
   def build_factory do
     %Build{
-      status: :incomplete,
+      hal_id: sequence(:hal_id, &"123#{&1}"),
       model: "test",
-      order_id: sequence(:order_id, &"123#{&1}")
+      order_id: sequence(:order_id, &"123#{&1}"),
+      status: :incomplete
     }
   end
 

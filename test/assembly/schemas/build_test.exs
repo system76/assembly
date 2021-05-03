@@ -6,7 +6,7 @@ defmodule Assembly.Schemas.BuildTest do
   describe "changeset/2" do
     test "returns an invalid changeset if missing required field" do
       assert %{valid?: false} = Build.changeset(%Build{}, %{})
-      assert %{valid?: true} = Build.changeset(%Build{}, %{model: "test", order_id: "1"})
+      assert %{valid?: true} = Build.changeset(%Build{}, %{hal_id: "1", model: "test", order_id: "1"})
     end
   end
 end

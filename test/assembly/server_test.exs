@@ -8,9 +8,9 @@ defmodule Assembly.ServerTest do
 
   describe "build_list/2" do
     test "streams a list of ready and incomplete builds" do
-      %{id: build_one} = insert(:build, status: :ready)
-      %{id: build_two} = insert(:build, status: :incomplete)
-      %{id: build_three} = insert(:build, status: :built)
+      %{hal_id: build_one} = insert(:build, status: :ready)
+      %{hal_id: build_two} = insert(:build, status: :incomplete)
+      %{hal_id: build_three} = insert(:build, status: :built)
 
       run_server([Assembly.Server], fn port ->
         {:ok, channel} = GRPC.Stub.connect("localhost:#{port}")

@@ -21,7 +21,7 @@ defmodule Assembly.Builds do
     query =
       from b in Build,
         left_join: c in assoc(b, :build_components),
-        where: b.id == ^build.id,
+        where: b.hal_id == ^build.id,
         preload: [build_components: c]
 
     params = Caster.cast(build)
