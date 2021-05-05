@@ -6,7 +6,8 @@ defmodule Assembly.Build do
 
   require Logger
 
-  alias Assembly.{Cache, Repo, Schemas.Build}
+  alias Assembly.{Cache, Repo}
+  alias Assembly.Schemas.{Build, BuildComponent}
 
   def start_link(%Build{} = build) do
     GenServer.start_link(__MODULE__, build)
@@ -29,32 +30,38 @@ defmodule Assembly.Build do
 
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
     Logger.info("Computing #{build.hal_id} status")
-    readyable? = Enum.all?(build_components, &components_available?/1)
+    missing_components = Enum.reduce(build_components, [], &components_available?/2)
 
     updated_build =
       build
-      |> Build.changeset(%{status: build_status(readyable?)})
+      |> Build.changeset(%{status: build_status(missing_components)})
       |> update_build()
 
-    {:noreply, updated_build}
+    {:noreply, %{updated_build | missing_components: missing_components}}
   end
 
-  defp build_status(true), do: :ready
-  defp build_status(false), do: :incomplete
+  defp build_status([]), do: :ready
+  defp build_status(_), do: :incomplete
 
-  defp components_available?(%{component_id: component_id, quantity: quantity_needed}) do
+  defp components_available?(%{component_id: component_id, quantity: quantity_needed}, acc) do
     quantity =
       component_id
       |> to_string()
       |> Cache.quantity_available()
 
-    not is_nil(quantity) and quantity >= quantity_needed
+    available = quantity || 0
+
+    if available < quantity_needed do
+      [%BuildComponent{component_id: component_id, quantity: quantity_needed - quantity} | acc]
+    else
+      acc
+    end
   end
 
   defp events_module, do: Application.get_env(:assembly, :events)
 
-  defp update_build(%{changes: changes}) when %{} == changes do
-    :ignored
+  defp update_build(%{changes: changes, data: build}) when %{} == changes do
+    build
   end
 
   defp update_build(changeset) do

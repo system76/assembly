@@ -14,6 +14,8 @@ defmodule Assembly.Schemas.Build do
     field :order_id, :string
     field :status, BuildStatusEnum
 
+    field :missing_components, :any, virtual: true
+
     has_many :build_components, BuildComponent, on_replace: :delete
 
     timestamps()
