@@ -29,9 +29,15 @@ defmodule Assembly.Builds do
     changeset = Build.changeset(build, params)
 
     with {:ok, updated_build} <- Repo.update(changeset),
-         [{_, pid}] <- Registry.lookup(Assembly.Registry, updated_build.id) do
+         [{_, pid}] <- Registry.lookup(Assembly.Registry, updated_build.hal_id) do
       update_build_process(pid, updated_build)
     end
+  end
+
+  def list do
+    Assembly.BuildSupervisor
+    |> DynamicSupervisor.which_children()
+    |> Stream.map(fn {_, pid, _type, _modules} -> GenServer.call(pid, :get_build) end)
   end
 
   def start_builds do
@@ -63,22 +69,14 @@ defmodule Assembly.Builds do
   defp start_children(builds) do
     Enum.map(builds, fn build ->
       {:ok, pid} = DynamicSupervisor.start_child(Assembly.BuildSupervisor, {Assembly.Build, build})
-      Registry.register(Assembly.Registry, to_string(build.id), pid)
+      Registry.register(Assembly.Registry, to_string(build.hal_id), pid)
+      GenServer.cast(pid, :determine_status)
       {:ok, pid, build}
     end)
   end
 
-  defp update_build_process(pid, %Build{id: id, status: :built}) do
-    Registry.unregister(Assembly.Registry, to_string(id))
-    DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid)
-  end
-
-  defp update_build_process(pid, %Build{} = build) do
-    GenServer.cast(pid, {:updated_build, build})
-  end
-
-  defp update_build_process(pid, %Build{id: id, status: :built}) do
-    Registry.unregister(Assembly.Registry, to_string(id))
+  defp update_build_process(pid, %Build{hal_id: hal_id, status: :built}) do
+    Registry.unregister(Assembly.Registry, to_string(hal_id))
     DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid)
   end
 

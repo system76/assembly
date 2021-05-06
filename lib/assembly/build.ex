@@ -24,6 +24,11 @@ defmodule Assembly.Build do
   end
 
   @impl true
+  def handle_call(:get_build, _from, build) do
+    {:reply, build, build}
+  end
+
+  @impl true
   def handle_cast({:update_build, new_build}, _old_build) do
     {:noreply, new_build}
   end

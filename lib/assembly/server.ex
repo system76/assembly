@@ -3,20 +3,12 @@ defmodule Assembly.Server do
 
   import Ecto.Query
 
-  alias Assembly.{Caster, Repo, Schemas}
+  alias Assembly.{Caster, Builds, Schemas}
   alias Bottle.Assembly.V1.{BuildListRequest, BuildListResponse}
 
   @spec build_list(BuildListRequest.t(), GRPC.Server.Stream.t()) :: any
   def build_list(_request, stream) do
-    query =
-      from b in Schemas.Build,
-        left_join: c in assoc(b, :build_components),
-        where: b.status != :built,
-        preload: [build_components: c]
-
-    query
-    |> Repo.all()
-    |> stream_results(stream)
+    stream_results(Builds.list(), stream)
   end
 
   defp stream_results(results, grpc_stream) do
