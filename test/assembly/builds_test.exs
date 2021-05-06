@@ -4,7 +4,7 @@ defmodule Assembly.BuildsTest do
   import Assembly.Factory
   import Mox
 
-  alias Assembly.{Builds, Cache, Caster, MockEvents, Schemas.Build}
+  alias Assembly.{Builds, Cache, MockEvents, Schemas.Build}
 
   setup :set_mox_from_context
   setup :verify_on_exit!
@@ -79,22 +79,6 @@ defmodule Assembly.BuildsTest do
       Assembly.BuildSupervisor
       |> DynamicSupervisor.which_children()
       |> Enum.each(fn {_, pid, _type, _modules} -> DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid) end)
-    end
-  end
-
-  describe "update/1" do
-    test "updates a build" do
-      %{build: build} = build_component = insert(:build_component, component_id: @component_id, quantity: 1)
-      build = %{build | build_components: [build_component]}
-
-      Builds.start_builds()
-
-      build
-      |> Map.put(:status, :built)
-      |> Caster.cast()
-      |> Builds.update()
-
-      assert %{active: 0} = DynamicSupervisor.count_children(Assembly.BuildSupervisor)
     end
   end
 end
