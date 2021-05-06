@@ -39,10 +39,11 @@ defmodule Assembly.Build do
 
     updated_build =
       build
+      |> Map.put(:missing_components, missing_components)
       |> Build.changeset(%{status: build_status(missing_components)})
       |> update_build()
 
-    {:noreply, %{updated_build | missing_components: missing_components}}
+    {:noreply, updated_build}
   end
 
   defp build_status([]), do: :ready
@@ -71,6 +72,8 @@ defmodule Assembly.Build do
 
   defp update_build(changeset) do
     with {:ok, updated_build} <- Repo.update(changeset) do
+      updated_build = %{updated_build | missing_components: changeset.data.missing_components}
+
       Logger.info("Broadcasting build #{updated_build.hal_id} state change")
       events_module().broadcast_build_update(changeset.data, updated_build)
 
