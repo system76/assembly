@@ -34,7 +34,7 @@ defmodule Assembly.Build do
   end
 
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
-    Logger.info("Computing #{build.hal_id} status")
+    Logger.info("Computing #{build.id} status")
     missing_components = Enum.reduce(build_components, [], &components_available?/2)
 
     updated_build =

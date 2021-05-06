@@ -1,7 +1,7 @@
 defmodule Assembly.Server do
   use GRPC.Server, service: Bottle.Assembly.V1.Service
 
-  import Ecto.Query
+  require Logger
 
   alias Assembly.{Caster, Builds, Schemas}
   alias Bottle.Assembly.V1.{BuildListRequest, BuildListResponse}
