@@ -4,24 +4,12 @@ defmodule Assembly.Cache do
   Implements the Cachex reactive and proactive cache warming.
   """
 
-  use Cachex.Warmer
-
-  @six_hours 60 * 6
-
-  @impl true
-  def execute(_state) do
-    events_module().request_quantity_update()
-    :ignore
-  end
+  require Logger
 
   def fallback(component_id) do
     events_module().request_quantity_update([component_id])
-    :ignore
+    {:ok, []}
   end
-
-  @impl true
-  def interval,
-    do: :timer.minutes(@six_hours)
 
   def quantity_available(component_id) do
     {:ok, value} = Cachex.get(__MODULE__, component_id)
@@ -29,6 +17,7 @@ defmodule Assembly.Cache do
   end
 
   def update_quantity_available(component_id, quantity) do
+    Logger.info("Updating #{component_id} quantity to #{quantity}")
     Cachex.put(__MODULE__, component_id, quantity)
   end
 

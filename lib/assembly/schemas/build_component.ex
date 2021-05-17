@@ -10,7 +10,7 @@ defmodule Assembly.Schemas.BuildComponent do
   @primary_key {:id, :binary_id, autogenerate: true}
 
   schema "build_components" do
-    field :component_id, :integer
+    field :component_id, :string
     field :quantity, :integer, default: 1
 
     belongs_to :build, Build
@@ -21,7 +21,7 @@ defmodule Assembly.Schemas.BuildComponent do
   def changeset(%BuildComponent{} = build_component, params) do
     build_component
     |> cast(params, [:build_id, :component_id, :quantity])
-    |> validate_required([:build_id, :component_id, :quantity])
+    |> validate_required([:component_id, :quantity])
     |> assoc_constraint(:build)
   end
 end

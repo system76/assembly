@@ -38,9 +38,10 @@ defmodule Assembly.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
+      {:amqp, "~> 2.0", override: true},
       {:appsignal, "~> 1.0"},
-      {:bottle, github: "system76/bottle", branch: "elixir", sha: "63d3cf0"},
-      {:broadway_sqs, "~> 0.6.0"},
+      {:bottle, github: "system76/bottle", ref: "df51f0d"},
+      {:broadway_rabbitmq, "~> 0.6"},
       {:cachex, "~> 3.3"},
       {:cowlib, "~> 2.9.0", override: true},
       {:ecto_enum, "~> 1.4"},

@@ -7,6 +7,8 @@ defmodule Assembly.Broadway do
   alias Assembly.{Builds, Cache}
   alias Broadway.Message
 
+  @source "assembly"
+
   def start_link(_opts) do
     producer_module = Application.fetch_env!(:assembly, :producer)
 
@@ -37,7 +39,8 @@ defmodule Assembly.Broadway do
 
     Bottle.RequestId.read(:queue, bottle)
 
-    with {:error, reason} <- notify_handler(bottle.resource) do
+    with false <- from_self?(bottle),
+         {:error, reason} <- notify_handler(bottle.resource) do
       Logger.error(reason)
     end
 
@@ -55,11 +58,20 @@ defmodule Assembly.Broadway do
   end
 
   defp notify_handler({:build_created, %{build: build}}) do
+    Logger.info("Handling Build Created message")
     Builds.new(build)
+  end
+
+  defp notify_handler({:build_updated, %{new: build}}) do
+    Logger.info("Handling Build Updated message")
+    Builds.update(build)
   end
 
   defp notify_handler({:component_availability_updated, availability_updated}) do
     %{id: component_id} = availability_updated.component
     Cache.update_quantity_available(component_id, availability_updated.quantity)
   end
+
+  defp from_self?(%{source: @source}), do: true
+  defp from_self?(_bottle), do: false
 end

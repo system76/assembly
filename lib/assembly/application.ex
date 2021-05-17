@@ -12,6 +12,7 @@ defmodule Assembly.Application do
   def start(_type, _args) do
     children = [
       {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
+      {Registry, keys: :unique, name: Assembly.Registry},
       Assembly.Repo,
       {Cachex, cachex_opts()},
       {GRPC.Server.Supervisor, {Assembly.Endpoint, 50_051}},
@@ -21,7 +22,12 @@ defmodule Assembly.Application do
     Logger.info("Starting Assembly")
 
     opts = [strategy: :one_for_one, name: Assembly.Supervisor]
-    Supervisor.start_link(children, opts)
+
+    with {:ok, pid} <- Supervisor.start_link(children, opts) do
+      warmup()
+
+      {:ok, pid}
+    end
   end
 
   defp cachex_opts do
@@ -30,11 +36,14 @@ defmodule Assembly.Application do
     else
       [
         name: Assembly.Cache,
-        warmers: [
-          warmer(module: Assembly.Cache)
-        ],
         fallback: fallback(default: &Assembly.Cache.fallback/1)
       ]
     end
+  end
+
+  defp warmup do
+    :assembly
+    |> Application.get_env(:warmup)
+    |> apply([])
   end
 end
