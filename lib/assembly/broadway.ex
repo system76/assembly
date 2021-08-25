@@ -69,6 +69,7 @@ defmodule Assembly.Broadway do
 
   defp notify_handler({:component_availability_updated, availability_updated}) do
     %{id: component_id} = availability_updated.component
+    Logger.info("Updating component availability", component_id: component_id)
     Cache.update_quantity_available(component_id, availability_updated.quantity)
   end
 

@@ -9,7 +9,7 @@ config :assembly,
 
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
-  metadata: [:request_id],
+  metadata: [:request_id, :component_id],
   level: :info
 
 config :ex_aws,
