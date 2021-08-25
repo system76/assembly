@@ -18,6 +18,7 @@ config :assembly,
   producer:
     {BroadwayRabbitMQ.Producer,
      queue: config["RABBITMQ_QUEUE_NAME"],
+     on_failure: :reject_and_requeue,
      connection: [
        username: config["RABBITMQ_USERNAME"],
        password: config["RABBITMQ_PASSWORD"],
@@ -40,11 +41,4 @@ config :amqp,
     events: [connection: :rabbitmq_conn]
   ]
 
-config :ex_aws,
-  access_key_id: config["AWS_ACCESS_KEY_ID"],
-  secret_access_key: config["AWS_SECRET_ACCESS_KEY"],
-  region: config["AWS_REGION"]
-
-config :appsignal, :config,
-  push_api_key: config["APPSIGNAL_KEY"],
-  env: config["ENVIRONMENT"]
+config :assembly, Assembly.Tracer, env: config["ENVIRONMENT"]

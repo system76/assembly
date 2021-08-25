@@ -1,5 +1,8 @@
 import Config
 
+config :assembly,
+  producer: {Broadway.DummyProducer, []}
+
 config :assembly, Assembly.Repo,
   username: "postgres",
   password: "postgres",

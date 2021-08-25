@@ -39,23 +39,27 @@ defmodule Assembly.MixProject do
   defp deps do
     [
       {:amqp, "~> 2.0", override: true},
-      {:appsignal, "~> 1.0"},
-      {:bottle, github: "system76/bottle", ref: "df51f0d"},
+      {:bottle, github: "system76/bottle", ref: "f66e8cc"},
       {:broadway_rabbitmq, "~> 0.6"},
       {:cachex, "~> 3.3"},
       {:cowlib, "~> 2.9.0", override: true},
+      {:credo, "~> 1.3", only: [:dev, :test]},
+      {:decorator, "~> 1.2"},
+      {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
       {:ecto_sql, "~> 3.5"},
       {:elixir_uuid, "~> 1.2"},
-      {:ex_aws_sqs, "~> 3.2"},
-      {:ex_aws, "~> 2.1.6"},
+      {:ex_machina, "~> 2.4", only: :test},
       {:hackney, "~> 1.16"},
+      {:httpoison, "~> 1.8"},
       {:jason, "~> 1.2", override: true},
+      {:logger_json, github: "Nebo15/logger_json", ref: "8e4290a"},
+      {:mox, "~> 1.0", only: :test},
       {:postgrex, "~> 0.15.7"},
       {:saxy, "~> 1.1"},
-      {:credo, "~> 1.4", only: [:dev, :test]},
-      {:ex_machina, "~> 2.4", only: :test},
-      {:mox, "~> 1.0", only: :test}
+      {:spandex_datadog, "~> 1.1"},
+      {:spandex, "~> 3.0.3"},
+      {:telemetry, "~> 0.4"}
     ]
   end
 

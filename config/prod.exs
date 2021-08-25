@@ -1,3 +1,7 @@
 import Config
 
-config :appsignal, :config, active: true
+config :logger,
+  backends: [LoggerJSON],
+  level: :info
+
+config :assembly, Assembly.Tracer, disabled?: false

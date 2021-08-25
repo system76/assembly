@@ -1,6 +1,6 @@
 defmodule Assembly.Broadway do
   use Broadway
-  use Appsignal.Instrumentation.Decorators
+  use Spandex.Decorators
 
   require Logger
 
@@ -30,7 +30,7 @@ defmodule Assembly.Broadway do
   end
 
   @impl true
-  @decorate transaction(:queue)
+  @decorate trace(service: :assembly, type: :function)
   def handle_message(_, %Message{data: data} = message, _context) do
     bottle =
       data
@@ -45,6 +45,10 @@ defmodule Assembly.Broadway do
     end
 
     message
+  rescue
+    e ->
+      Logger.error(inspect(e))
+      message
   end
 
   @impl true
@@ -71,6 +75,16 @@ defmodule Assembly.Broadway do
     %{id: component_id} = availability_updated.component
     Logger.info("Updating component availability", component_id: component_id)
     Cache.update_quantity_available(component_id, availability_updated.quantity)
+  end
+
+  defp notify_handler({event, _message}) do
+    Logger.warn("Ignoring #{event} message")
+    :ignored
+  end
+
+  defp notify_handler(message) do
+    Logger.error("Unable to handle unknown message", resource: inspect(message))
+    :ignored
   end
 
   defp from_self?(%{source: @source}), do: true
