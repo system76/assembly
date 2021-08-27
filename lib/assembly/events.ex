@@ -19,7 +19,9 @@ defmodule Assembly.Events do
   def request_quantity_update(component_ids \\ []) do
     component_ids
     |> Assembly.InventoryService.request_quantity_update()
-    |> Stream.each(fn {:ok, resp} -> Cache.update_quantity_available(resp.component.id, resp.available) end)
+    |> Stream.each(fn {:ok, resp} ->
+      Cache.update_quantity_available(resp.component.id, resp.total_available_quantity)
+    end)
     |> Stream.run()
 
     Builds.recalculate_statues()
