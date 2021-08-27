@@ -1,7 +1,8 @@
 import Config
 
 config :assembly,
-  producer: {Broadway.DummyProducer, []}
+  producer: {Broadway.DummyProducer, []},
+  warmup: fn -> :ok end
 
 config :assembly, Assembly.Repo,
   username: "postgres",

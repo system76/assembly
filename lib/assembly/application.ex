@@ -10,15 +10,17 @@ defmodule Assembly.Application do
   import Cachex.Spec
 
   def start(_type, _args) do
-    children = [
-      {SpandexDatadog.ApiServer, [http: HTTPoison, host: "127.0.0.1", batch_size: 2]},
-      {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
-      {Registry, keys: :unique, name: Assembly.Registry},
-      Assembly.Repo,
-      {Cachex, cachex_opts()},
-      {GRPC.Server.Supervisor, {Assembly.Endpoint, 50_051}},
-      {Assembly.Broadway, []}
-    ]
+    children =
+      [
+        {SpandexDatadog.ApiServer, [http: HTTPoison, host: "127.0.0.1", batch_size: 2]},
+        {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
+        {Registry, keys: :unique, name: Assembly.Registry},
+        Assembly.Repo,
+        {Cachex, cachex_opts()},
+        {GRPC.Server.Supervisor, {Assembly.Endpoint, 50_051}},
+        {Assembly.Broadway, []}
+      ]
+      |> maybe_put(Assembly.InventoryServiceClient, Application.get_env(:hal, :assembly_service_url))
 
     Logger.info("Starting Assembly")
 
@@ -47,4 +49,8 @@ defmodule Assembly.Application do
     |> Application.get_env(:warmup)
     |> apply([])
   end
+
+  defp maybe_put(list, _value, false), do: list
+  defp maybe_put(list, _value, nil), do: list
+  defp maybe_put(list, value, _), do: list ++ [value]
 end

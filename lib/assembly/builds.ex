@@ -34,6 +34,13 @@ defmodule Assembly.Builds do
     end
   end
 
+  def get(%Bottle.Assembly.V1.Build{} = build) do
+    case Registry.lookup(Assembly.Registry, build.id) do
+      [{_, pid}] -> GenServer.call(pid, :get_build)
+      _ -> nil
+    end
+  end
+
   def list do
     Assembly.BuildSupervisor
     |> DynamicSupervisor.which_children()
