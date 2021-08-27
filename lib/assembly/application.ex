@@ -20,7 +20,7 @@ defmodule Assembly.Application do
         {GRPC.Server.Supervisor, {Assembly.Endpoint, 50_051}},
         {Assembly.Broadway, []}
       ]
-      |> maybe_put(Assembly.InventoryServiceClient, Application.get_env(:hal, :assembly_service_url))
+      |> maybe_put(Assembly.InventoryServiceClient, Application.get_env(:assembly, :inventory_service_url))
 
     Logger.info("Starting Assembly")
 
