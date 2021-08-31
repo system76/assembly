@@ -10,7 +10,10 @@ defmodule Assembly.BuildTest do
 
   describe "handle_cast/2" do
     test ":determine_status does not change in progress build" do
-      %{build: build} = build_component = insert(:build_component, component_id: "123", quantity: 3, build: build(:build, status: :inprogress))
+      %{build: build} =
+        build_component =
+        insert(:build_component, component_id: "123", quantity: 3, build: build(:build, status: :inprogress))
+
       Cache.update_quantity_available("123", 1)
 
       expect(MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
