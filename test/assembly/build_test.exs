@@ -16,8 +16,6 @@ defmodule Assembly.BuildTest do
 
       Cache.update_quantity_available("123", 1)
 
-      expect(MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
-
       assert {:noreply, %{status: :inprogress}} =
                Build.handle_cast(:determine_status, %{build | build_components: [build_component]})
 
