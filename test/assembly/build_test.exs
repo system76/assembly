@@ -9,6 +9,19 @@ defmodule Assembly.BuildTest do
   setup :verify_on_exit!
 
   describe "handle_cast/2" do
+    test ":determine_status does not change in progress build" do
+      %{build: build} =
+        build_component =
+        insert(:build_component, component_id: "123", quantity: 3, build: build(:build, status: :inprogress))
+
+      Cache.update_quantity_available("123", 1)
+
+      assert {:noreply, %{status: :inprogress}} =
+               Build.handle_cast(:determine_status, %{build | build_components: [build_component]})
+
+      assert %{status: :inprogress} = Repo.get(Schemas.Build, build.id)
+    end
+
     test ":determine_status updates database if changed" do
       %{build: build} = build_component = insert(:build_component, component_id: "123", quantity: 1)
       Cache.update_quantity_available("123", 1)
