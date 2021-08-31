@@ -40,14 +40,15 @@ defmodule Assembly.Build do
     updated_build =
       build
       |> Map.put(:missing_components, missing_components)
-      |> Build.changeset(%{status: build_status(missing_components)})
+      |> Build.changeset(%{status: build_status(build, missing_components)})
       |> update_build()
 
     {:noreply, updated_build}
   end
 
-  defp build_status([]), do: :ready
-  defp build_status(_), do: :incomplete
+  defp build_status(%{status: :inprogress}, _missing_components), do: :inprogress
+  defp build_status(_build, []), do: :ready
+  defp build_status(_build, _missing_components), do: :incomplete
 
   defp components_available?(%{component_id: component_id, quantity: quantity_needed}, acc) do
     quantity =
