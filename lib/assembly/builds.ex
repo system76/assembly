@@ -29,7 +29,7 @@ defmodule Assembly.Builds do
     changeset = Build.changeset(build, params)
 
     with {:ok, updated_build} <- Repo.update(changeset),
-         [{_, pid}] <- Registry.lookup(Assembly.Registry, updated_build.hal_id) do
+         [{_, pid}] <- Registry.lookup(Assembly.Registry, build.id) do
       update_build_process(pid, updated_build)
     end
   end
