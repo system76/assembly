@@ -11,10 +11,10 @@ defmodule Assembly.Caster do
   def cast(%Build{} = build) do
     %{
       id: Ecto.UUID.generate(),
-      build_components: Enum.map(build.build_components, &parse_build_component/1),
+      build_components: maybe_map(build.build_components, &parse_build_component/1),
       hal_id: build.id,
       inserted_at: build.created_at,
-      missing_components: Enum.map(build.missing_components, &parse_build_component/1),
+      missing_components: maybe_map(build.missing_components, &parse_build_component/1),
       model: build.model,
       order_id: to_string(build.order.id),
       status: parse_status(build.status),
@@ -24,16 +24,19 @@ defmodule Assembly.Caster do
 
   def cast(%Schemas.Build{} = build) do
     Build.new(
-      build_components: Enum.map(build.build_components, &parse_build_component/1),
+      build_components: maybe_map(build.build_components, &parse_build_component/1),
       created_at: to_string(build.inserted_at),
       id: to_string(build.hal_id),
-      missing_components: Enum.map(build.missing_components, &parse_build_component/1),
+      missing_components: maybe_map(build.missing_components, &parse_build_component/1),
       model: build.model,
       order: Order.new(id: build.order_id),
       status: parse_status(build.status),
       updated_at: to_string(build.updated_at)
     )
   end
+
+  defp maybe_map(values, f) when is_list(values), do: Enum.map(values, f)
+  defp maybe_map(_, _f), do: []
 
   defp parse_build_component(%Build.BuildComponent{component: %{id: id}, quantity: quantity}) do
     %{
