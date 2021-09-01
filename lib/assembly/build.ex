@@ -29,7 +29,8 @@ defmodule Assembly.Build do
   end
 
   @impl true
-  def handle_cast({:update_build, new_build}, _old_build) do
+  def handle_cast({:updated_build, new_build}, old_build) do
+    emit_updated_build(old_build, new_build)
     {:noreply, new_build}
   end
 
@@ -65,8 +66,6 @@ defmodule Assembly.Build do
     end
   end
 
-  defp events_module, do: Application.get_env(:assembly, :events)
-
   defp update_build(%{changes: changes, data: build}) when %{} == changes do
     build
   end
@@ -74,11 +73,16 @@ defmodule Assembly.Build do
   defp update_build(changeset) do
     with {:ok, updated_build} <- Repo.update(changeset) do
       updated_build = %{updated_build | missing_components: changeset.data.missing_components}
-
-      Logger.info("Broadcasting build #{updated_build.hal_id} state change")
-      events_module().broadcast_build_update(changeset.data, updated_build)
-
-      updated_build
+      emit_updated_build(changeset.data, updated_build)
     end
   end
+
+  defp emit_updated_build(old_build, updated_build) do
+    Logger.info("Broadcasting build #{updated_build.hal_id} state change")
+    events_module().broadcast_build_update(old_build, updated_build)
+
+    updated_build
+  end
+
+  defp events_module, do: Application.get_env(:assembly, :events)
 end

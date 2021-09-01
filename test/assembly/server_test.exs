@@ -20,7 +20,7 @@ defmodule Assembly.ServerTest do
   setup :verify_on_exit!
 
   describe "get_build/1" do
-    test "returns data abouse a build" do
+    test "returns data about a build" do
       %{build: build} = insert(:build_component, component_id: "321", quantity: 5)
       build_id = to_string(build.hal_id)
 
