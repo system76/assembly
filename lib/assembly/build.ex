@@ -15,6 +15,7 @@ defmodule Assembly.Build do
 
   @impl true
   def init(%Build{} = build) do
+    Logger.metadata(build_id: build.hal_id)
     {:ok, build}
   end
 
@@ -35,7 +36,7 @@ defmodule Assembly.Build do
   end
 
   def handle_cast(:determine_status, %{build_components: build_components} = build) do
-    Logger.info("Computing #{build.id} status")
+    Logger.info("Computing status")
     missing_components = Enum.reduce(build_components, [], &components_available?/2)
 
     updated_build =
@@ -78,7 +79,7 @@ defmodule Assembly.Build do
   end
 
   defp emit_updated_build(old_build, updated_build) do
-    Logger.info("Broadcasting build #{updated_build.hal_id} state change")
+    Logger.info("Broadcasting build state change")
     events_module().broadcast_build_update(old_build, updated_build)
 
     updated_build
