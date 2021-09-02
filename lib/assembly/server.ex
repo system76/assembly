@@ -16,12 +16,13 @@ defmodule Assembly.Server do
 
   @spec get_build(GetBuildRequest.t(), GRPC.Server.Stream.t()) :: GetBuildResponse.t()
   def get_build(request, _stream) do
-    build =
-      request.build
-      |> Builds.get()
-      |> Caster.cast()
+    case Builds.get(request.build) do
+      nil ->
+        GetBuildResponse.new(request_id: Bottle.RequestId.write(:rpc), build: nil)
 
-    GetBuildResponse.new(request_id: Bottle.RequestId.write(:rpc), build: build)
+      build ->
+        GetBuildResponse.new(request_id: Bottle.RequestId.write(:rpc), build: Caster.cast(build))
+    end
   end
 
   @spec list_pickable_builds(ListPickableBuildsRequest.t(), GRPC.Server.Stream.t()) :: any
