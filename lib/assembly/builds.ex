@@ -24,9 +24,16 @@ defmodule Assembly.Builds do
         where: b.hal_id == ^build.id,
         preload: [build_components: c]
 
+    Logger.info("Query for build update", resource: inspect(query))
+
     params = Caster.cast(build)
+
+    Logger.info("Caster for build update", resource: inspect(params))
+
     build = Repo.one(query)
     changeset = Build.changeset(build, params)
+
+    Logger.info("Found build while updating", resource: inspect(build))
 
     with {:ok, updated_build} <- Repo.update(changeset),
          [{_, pid}] <- Registry.lookup(Assembly.Registry, build.id) do
