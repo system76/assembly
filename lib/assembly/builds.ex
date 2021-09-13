@@ -41,13 +41,7 @@ defmodule Assembly.Builds do
   end
 
   def pick(%Bottle.Assembly.V1.Build{id: hal_id}) do
-    query =
-      from b in Build,
-        left_join: c in assoc(b, :build_components),
-        where: b.hal_id == ^hal_id,
-        preload: [build_components: c]
-
-    build = Repo.one(query)
+    build = Repo.get_by(Build, hal_id: hal_id)
     changeset = Build.changeset(build, %{status: :inprogress})
 
     with {:ok, updated_build} <- Repo.update(changeset) do
