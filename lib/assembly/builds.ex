@@ -33,18 +33,29 @@ defmodule Assembly.Builds do
     build = Repo.one(query)
     changeset = Build.changeset(build, params)
 
-    Logger.info("Found build while updating", resource: inspect(build))
+    Logger.info("Build for updating", resource: inspect(build))
 
-    with {:ok, updated_build} <- Repo.update(changeset),
-         [{_, pid}] <- Registry.lookup(Assembly.Registry, build.id) do
-      update_build_process(pid, updated_build)
+    if changes?(changeset) do
+      with {:ok, updated_build} <- Repo.update(changeset) do
+        case Registry.lookup(Assembly.Registry, to_string(build.id)) do
+          [{_, pid}] -> update_build_process(pid, updated_build)
+          [] -> {:ok, updated_build}
+        end
+      end
+    else
+      {:ok, build}
     end
   end
 
-  def get(%Bottle.Assembly.V1.Build{} = build) do
-    case Registry.lookup(Assembly.Registry, build.id) do
-      [{_, pid}] -> GenServer.call(pid, :get_build)
-      _ -> nil
+  def changes?(%{changes: changes}) when map_size(changes) == 0, do: false
+  def changes?(_changeset), do: true
+
+  def get(%Bottle.Assembly.V1.Build{id: hal_id}) do
+    with %{id: build_id} <- Repo.get_by(Build, hal_id: to_string(hal_id)) do
+      case Registry.lookup(Assembly.Registry, to_string(build_id)) do
+        [{_, pid}] -> GenServer.call(pid, :get_build)
+        _ -> nil
+      end
     end
   end
 
@@ -83,14 +94,14 @@ defmodule Assembly.Builds do
   defp start_children(builds) do
     Enum.map(builds, fn build ->
       {:ok, pid} = DynamicSupervisor.start_child(Assembly.BuildSupervisor, {Assembly.Build, build})
-      Registry.register(Assembly.Registry, to_string(build.hal_id), pid)
+      Registry.register(Assembly.Registry, to_string(build.id), pid)
       GenServer.cast(pid, :determine_status)
       {:ok, pid, build}
     end)
   end
 
-  defp update_build_process(pid, %Build{hal_id: hal_id, status: :built}) do
-    Registry.unregister(Assembly.Registry, to_string(hal_id))
+  defp update_build_process(pid, %Build{id: id, status: :built}) do
+    Registry.unregister(Assembly.Registry, to_string(id))
     DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid)
   end
 

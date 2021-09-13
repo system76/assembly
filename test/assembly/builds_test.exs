@@ -44,6 +44,27 @@ defmodule Assembly.BuildsTest do
     end
   end
 
+  describe "update/1" do
+    test "emits an updated build event" do
+      build = insert(:build, status: :ready) |> Repo.preload([:build_components])
+
+      expect(MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
+
+      Builds.start_builds()
+
+      updated_build_message = Assembly.Caster.cast(%{build | status: :inprogress, missing_components: []})
+      Builds.update(updated_build_message)
+
+      Process.sleep(10)
+
+      assert %{status: :inprogress} = Repo.get(Build, build.id)
+
+      Assembly.BuildSupervisor
+      |> DynamicSupervisor.which_children()
+      |> Enum.each(fn {_, pid, _type, _modules} -> DynamicSupervisor.terminate_child(Assembly.BuildSupervisor, pid) end)
+    end
+  end
+
   describe "start_builds/0" do
     test "loads builds from database and starts GenServers" do
       insert_pair(:build)
