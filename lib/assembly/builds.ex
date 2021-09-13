@@ -30,13 +30,25 @@ defmodule Assembly.Builds do
 
     if changes?(changeset) do
       with {:ok, updated_build} <- Repo.update(changeset) do
-        case Registry.lookup(Assembly.Registry, to_string(build.id)) do
+        case Registry.lookup(Assembly.Registry, to_string(updated_build.id)) do
           [{_, pid}] -> update_build_process(pid, updated_build)
           [] -> {:ok, updated_build}
         end
       end
     else
       {:ok, build}
+    end
+  end
+
+  def pick(%Bottle.Assembly.V1.Build{id: hal_id}) do
+    build = Repo.get_by(Build, hal_id: hal_id)
+    changeset = Build.changeset(build, %{status: :inprogress})
+
+    with {:ok, updated_build} <- Repo.update(changeset) do
+      case Registry.lookup(Assembly.Registry, to_string(updated_build.id)) do
+        [{_, pid}] -> update_build_process(pid, updated_build)
+        [] -> {:ok, updated_build}
+      end
     end
   end
 

@@ -47,7 +47,7 @@ defmodule Assembly.Broadway do
     message
   rescue
     e ->
-      Logger.error(inspect(e))
+      Logger.error(Exception.format(:error, e, __STACKTRACE__))
       message
   end
 
@@ -79,7 +79,7 @@ defmodule Assembly.Broadway do
     Logger.metadata(build_id: build.id)
     Logger.info("Handling Build Picked message")
 
-    Builds.update(%{build | status: :BUILD_STATUS_INPROGRESS})
+    Builds.pick(build)
   end
 
   defp notify_handler({:component_availability_updated, availability_updated}) do
