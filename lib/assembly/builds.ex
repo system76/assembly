@@ -30,7 +30,7 @@ defmodule Assembly.Builds do
 
     if changes?(changeset) do
       with {:ok, updated_build} <- Repo.update(changeset) do
-        case Registry.lookup(Assembly.Registry, to_string(build.id)) do
+        case Registry.lookup(Assembly.Registry, to_string(updated_build.id)) do
           [{_, pid}] -> update_build_process(pid, updated_build)
           [] -> {:ok, updated_build}
         end
@@ -45,7 +45,7 @@ defmodule Assembly.Builds do
     changeset = Build.changeset(build, %{status: :inprogress})
 
     with {:ok, updated_build} <- Repo.update(changeset) do
-      case Registry.lookup(Assembly.Registry, to_string(build.id)) do
+      case Registry.lookup(Assembly.Registry, to_string(updated_build.id)) do
         [{_, pid}] -> update_build_process(pid, updated_build)
         [] -> {:ok, updated_build}
       end
