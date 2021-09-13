@@ -24,16 +24,9 @@ defmodule Assembly.Builds do
         where: b.hal_id == ^build.id,
         preload: [build_components: c]
 
-    Logger.info("Query for build update", resource: inspect(query))
-
     params = Caster.cast(build)
-
-    Logger.info("Caster for build update", resource: inspect(params))
-
     build = Repo.one(query)
     changeset = Build.changeset(build, params)
-
-    Logger.info("Build for updating", resource: inspect(build))
 
     if changes?(changeset) do
       with {:ok, updated_build} <- Repo.update(changeset) do
@@ -44,6 +37,24 @@ defmodule Assembly.Builds do
       end
     else
       {:ok, build}
+    end
+  end
+
+  def pick(%Bottle.Assembly.V1.Build{id: hal_id}) do
+    query =
+      from b in Build,
+        left_join: c in assoc(b, :build_components),
+        where: b.hal_id == ^hal_id,
+        preload: [build_components: c]
+
+    build = Repo.one(query)
+    changeset = Build.changeset(build, %{status: :inprogress})
+
+    with {:ok, updated_build} <- Repo.update(changeset) do
+      case Registry.lookup(Assembly.Registry, to_string(build.id)) do
+        [{_, pid}] -> update_build_process(pid, updated_build)
+        [] -> {:ok, updated_build}
+      end
     end
   end
 

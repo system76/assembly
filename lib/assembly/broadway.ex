@@ -72,7 +72,7 @@ defmodule Assembly.Broadway do
     Logger.metadata(build_id: build.id)
     Logger.info("Handling Build Updated message")
 
-    Builds.update(build)
+    Builds.pick(build)
   end
 
   defp notify_handler({:build_picked, %{build: build}}) do
