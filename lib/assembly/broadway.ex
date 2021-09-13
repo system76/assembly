@@ -47,7 +47,7 @@ defmodule Assembly.Broadway do
     message
   rescue
     e ->
-      Logger.error(Exception.format(:error, e, e.stacktrace))
+      Logger.error(Exception.format(:error, e, __STACKTRACE__))
       message
   end
 
