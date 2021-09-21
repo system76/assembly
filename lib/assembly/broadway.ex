@@ -33,7 +33,7 @@ defmodule Assembly.Broadway do
   @decorate trace(service: :assembly, type: :function)
   def handle_message(_, %Message{data: data} = message, _context) do
     Logger.reset_metadata()
-  
+
     bottle =
       data
       |> URI.decode()
@@ -86,12 +86,12 @@ defmodule Assembly.Broadway do
 
   defp notify_handler({:component_availability_updated, availability_updated}) do
     %{id: component_id} = availability_updated.component
-    Logger.info("Updating component availability", component_id: component_id)
+    Logger.metadata(component_id: component_id)
     Cache.update_quantity_available(component_id, availability_updated.quantity)
   end
 
-  defp notify_handler({event, _message}) do
-    Logger.warn("Ignoring #{event} message")
+  defp notify_handler({event, message}) do
+    Logger.warn("Ignoring #{event} message", resource: inspect(message))
     :ignored
   end
 

@@ -1,6 +1,6 @@
 defmodule Assembly do
   @moduledoc """
-  Assembly Line functionality 
+  Assembly Line functionality
   """
 
   require Logger
@@ -17,7 +17,6 @@ defmodule Assembly do
       |> Enum.uniq()
       |> Enum.map(&to_string(&1.component_id))
 
-    Logger.info("Requesting availability for #{length(components)} components")
     request_quantity_update(components)
   end
 

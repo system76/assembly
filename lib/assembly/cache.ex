@@ -17,7 +17,7 @@ defmodule Assembly.Cache do
   end
 
   def update_quantity_available(component_id, quantity) do
-    Logger.info("Updating #{component_id} quantity to #{quantity}")
+    Logger.info("Updating quantity to #{quantity}")
     Cachex.put(__MODULE__, component_id, quantity)
   end
 
