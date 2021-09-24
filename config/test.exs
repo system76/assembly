@@ -25,5 +25,4 @@ config :amqp,
     events: [connection: :rabbitmq_conn]
   ]
 
-
 config :grpc, start_server: false
