@@ -1,7 +1,6 @@
 import Config
 
 config :assembly,
-  cachex_opts: [name: Assembly.Cache],
   events: Assembly.MockEvents,
   producer: {Broadway.DummyProducer, []},
   warmup: fn -> :ok end

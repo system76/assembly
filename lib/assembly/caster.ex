@@ -3,54 +3,39 @@ defmodule Assembly.Caster do
   This module is responsible for casting Avalara responses into `Bottle` messages.
   """
 
-  alias Assembly.Schemas
-  alias Bottle.Assembly.V1.Build
-  alias Bottle.Inventory.V1.Component
-  alias Bottle.Fulfillment.V1.Order
-
-  def cast(%Build{} = build) do
+  def cast(%Bottle.Assembly.V1.Build{} = build) do
     %{
-      id: Ecto.UUID.generate(),
-      build_components: maybe_map(build.build_components, &parse_build_component/1),
       hal_id: build.id,
-      inserted_at: build.created_at,
-      missing_components: maybe_map(build.missing_components, &parse_build_component/1),
       model: build.model,
       order_id: to_string(build.order.id),
       status: parse_status(build.status),
+      options:
+        maybe_map(build.build_components, fn c ->
+          %{component_id: c.component.id, quantity: c.quantity}
+        end),
+      inserted_at: build.created_at,
       updated_at: build.updated_at
     }
   end
 
-  def cast(%Schemas.Build{} = build) do
-    Build.new(
-      build_components: maybe_map(build.build_components, &parse_build_component/1),
-      created_at: to_string(build.inserted_at),
+  def cast(%Assembly.Schemas.Build{} = build) do
+    Bottle.Assembly.V1.Build.new(
       id: to_string(build.hal_id),
-      missing_components: maybe_map(build.missing_components, &parse_build_component/1),
       model: build.model,
-      order: Order.new(id: build.order_id),
+      order: %{id: build.order_id},
       status: parse_status(build.status),
+      build_components:
+        maybe_map(build.options, fn o ->
+          %{component: %{id: to_string(o.component_id)}, quantity: o.quantity}
+        end),
+      missing_components: [],
+      created_at: to_string(build.inserted_at),
       updated_at: to_string(build.updated_at)
     )
   end
 
   defp maybe_map(values, f) when is_list(values), do: Enum.map(values, f)
   defp maybe_map(_, _f), do: []
-
-  defp parse_build_component(%Build.BuildComponent{component: %{id: id}, quantity: quantity}) do
-    %{
-      component_id: id,
-      quantity: quantity
-    }
-  end
-
-  defp parse_build_component(%Schemas.BuildComponent{} = build_component) do
-    Build.BuildComponent.new(
-      component: Component.new(id: build_component.component_id),
-      quantity: build_component.quantity
-    )
-  end
 
   defp parse_status(:BUILD_STATUS_BUILT), do: :built
   defp parse_status(:BUILD_STATUS_INPROGRESS), do: :inprogress

@@ -1,5 +1,11 @@
 defmodule Assembly.InventoryServiceClient do
+  @moduledoc """
+  A basic GenServer responsible for keeping the HTTPS gRPC connection to the
+  inventory microservice alive.
+  """
+
   use GenServer
+
   require Logger
 
   def start_link(_) do
@@ -12,9 +18,9 @@ defmodule Assembly.InventoryServiceClient do
 
   @impl true
   def init(_) do
-    Logger.debug("Assembly.InventoryServiceClient connecting to gateway at #{inventory_service_url()}")
+    Logger.debug("Assembly.InventoryServiceClient connecting to gateway at #{config(:url)}")
 
-    case GRPC.Stub.connect(inventory_service_url(), inventory_service_options()) do
+    case GRPC.Stub.connect(config(:url), inventory_service_options()) do
       {:error, error} ->
         Logger.error("Assembly.InventoryServiceClient could not connect: #{error}")
         Process.sleep(5000)
@@ -29,13 +35,19 @@ defmodule Assembly.InventoryServiceClient do
   @impl true
   def handle_info({:gun_down, _, _, _, _}, _state) do
     Logger.debug("Assembly.InventoryServiceClient disconnected")
-    init(%{})
+
+    with {:ok, channel} <- init(%{}) do
+      {:noreply, channel}
+    end
   end
 
   @impl true
   def handle_info({:gun_up, _, _, _, _}, _state) do
     Logger.debug("Assembly.InventoryServiceClient connected")
-    init(%{})
+
+    with {:ok, channel} <- init(%{}) do
+      {:noreply, channel}
+    end
   end
 
   @impl true
@@ -43,13 +55,20 @@ defmodule Assembly.InventoryServiceClient do
     {:reply, channel, channel}
   end
 
-  defp inventory_service_url, do: Application.get_env(:assembly, :inventory_service_url)
+  defp inventory_service_options() do
+    options = [
+      interceptors: [GRPC.Logger.Client]
+    ]
 
-  defp inventory_service_options do
-    if not is_nil(inventory_service_url()) and String.contains?(inventory_service_url(), "localhost") do
-      [interceptors: [GRPC.Logger.Client]]
+    if config(:ssl, true) do
+      Keyword.put(options, :cred, GRPC.Credential.new([]))
     else
-      [cred: GRPC.Credential.new([]), interceptors: [GRPC.Logger.Client]]
+      options
     end
+  end
+
+  defp config(key, default \\ nil) do
+    config = Application.get_env(:assembly, __MODULE__)
+    Keyword.get(config, key, default)
   end
 end

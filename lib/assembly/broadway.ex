@@ -4,7 +4,7 @@ defmodule Assembly.Broadway do
 
   require Logger
 
-  alias Assembly.{Builds, Cache}
+  alias Assembly.{Build, Caster, ComponentCache}
   alias Broadway.Message
 
   @source "assembly"
@@ -43,7 +43,7 @@ defmodule Assembly.Broadway do
 
     with false <- from_self?(bottle),
          {:error, reason} <- notify_handler(bottle.resource) do
-      Logger.error(reason)
+      Logger.error(inspect(reason))
     end
 
     message
@@ -63,39 +63,54 @@ defmodule Assembly.Broadway do
     [failed_message]
   end
 
-  defp notify_handler({:build_created, %{build: build}}) do
+  def notify_handler({:build_created, %{build: build}}) do
     Logger.metadata(build_id: build.id)
     Logger.info("Handling Build Created message")
 
-    Builds.new(build)
+    build
+    |> Caster.cast()
+    |> Build.create_build()
   end
 
-  defp notify_handler({:build_updated, %{new: build}}) do
+  def notify_handler({:build_updated, %{new: build}}) do
     Logger.metadata(build_id: build.id)
     Logger.info("Handling Build Updated message")
 
-    Builds.update(build)
+    case Build.get_build(build.id) do
+      nil ->
+        Logger.warn("Trying to update build that doesn't exist in local data")
+
+      saved_build ->
+        Build.update_build(saved_build, Caster.cast(build))
+    end
   end
 
-  defp notify_handler({:build_picked, %{build: build}}) do
+  def notify_handler({:build_picked, %{build: build}}) do
     Logger.metadata(build_id: build.id)
     Logger.info("Handling Build Picked message")
 
-    Builds.pick(build)
+    # We delay here to ensure that the Warehouse service assigns the parts to
+    # the build before anything else.
+    Process.sleep(1000)
+
+    with {:error, :not_found} <- Build.pick_build(build.id) do
+      Logger.warn("Trying to pick a build that doesn't exist in local data")
+    end
   end
 
-  defp notify_handler({:component_availability_updated, availability_updated}) do
-    %{id: component_id} = availability_updated.component
+  def notify_handler({:component_availability_updated, availability_updated}) do
+    %{component: %{id: component_id}, quantity: quantity} = availability_updated
     Logger.metadata(component_id: component_id)
-    Cache.update_quantity_available(component_id, availability_updated.quantity)
+
+    ComponentCache.put(component_id, quantity)
   end
 
-  defp notify_handler({event, message}) do
+  def notify_handler({event, message}) do
     Logger.warn("Ignoring #{event} message", resource: inspect(message))
     :ignored
   end
 
-  defp notify_handler(message) do
+  def notify_handler(message) do
     Logger.error("Unable to handle unknown message", resource: inspect(message))
     :ignored
   end

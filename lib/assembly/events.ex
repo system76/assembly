@@ -2,29 +2,38 @@ defmodule Assembly.Events do
   @moduledoc """
   Encapsulate sending messages over RPC and Rabbit
   """
+
   require Logger
 
-  alias Assembly.{Builds, Cache, Caster}
-  alias Bottle.Assembly.V1.BuildUpdated
+  alias Assembly.{ComponentCache, Caster}
+  alias Bottle.Assembly.V1.{BuildUpdated, ComponentDemandUpdated}
 
-  @callback broadcast_build_update(struct(), struct()) :: :ok
+  @callback broadcast_build_update(map(), map()) :: :ok
+  @callback broadcast_component_demand(String.t(), integer()) :: :ok
   @callback request_quantity_update() :: :ok
   @callback request_quantity_update(list()) :: :ok
 
+  @source "assembly"
+
   def broadcast_build_update(old, new) do
     message = BuildUpdated.new(old: Caster.cast(old), new: Caster.cast(new))
-    Bottle.publish(message, source: "assembly")
+    Bottle.publish(message, source: @source)
+  end
+
+  def broadcast_component_demand(component_id, demand) do
+    message = ComponentDemandUpdated.new(component_id: component_id, demand: demand)
+    Bottle.publish(message, source: @source)
   end
 
   def request_quantity_update(component_ids \\ []) do
     component_ids
     |> Assembly.InventoryService.request_quantity_update()
     |> Stream.each(fn {:ok, resp} ->
-      Cache.update_quantity_available(resp.component.id, resp.total_available_quantity)
+      ComponentCache.put(resp.component.id, resp.total_available_quantity)
     end)
     |> Stream.run()
 
-    Builds.recalculate_statues()
+    # Builds.recalculate_statues()
 
     :ok
   end

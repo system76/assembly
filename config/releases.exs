@@ -14,7 +14,6 @@ config :assembly, Assembly.Repo,
   pool_size: config["DB_POOL"]
 
 config :assembly,
-  inventory_service_url: config["INVENTORY_SERVICE_URL"],
   producer:
     {BroadwayRabbitMQ.Producer,
      queue: config["RABBITMQ_QUEUE_NAME"],
@@ -40,5 +39,10 @@ config :amqp,
   channels: [
     events: [connection: :rabbitmq_conn]
   ]
+
+config :assembly, Assembly.InventoryServiceClient,
+  enabled?: true,
+  url: config["INVENTORY_SERVICE_URL"],
+  ssl: true
 
 config :assembly, Assembly.Tracer, env: config["ENVIRONMENT"]

@@ -3,7 +3,7 @@ defmodule Assembly.Server do
 
   require Logger
 
-  alias Assembly.{Caster, Builds, Schemas}
+  alias Assembly.{Build, Caster, Schemas}
 
   alias Bottle.Assembly.V1.{
     GetBuildRequest,
@@ -16,18 +16,15 @@ defmodule Assembly.Server do
 
   @spec get_build(GetBuildRequest.t(), GRPC.Server.Stream.t()) :: GetBuildResponse.t()
   def get_build(request, _stream) do
-    case Builds.get(request.build) do
-      nil ->
-        GetBuildResponse.new(request_id: Bottle.RequestId.write(:rpc), build: nil)
+    build_info = Build.get_build(request.build.id)
+    build = if is_nil(build_info), do: nil, else: Caster.cast(build_info)
 
-      build ->
-        GetBuildResponse.new(request_id: Bottle.RequestId.write(:rpc), build: Caster.cast(build))
-    end
+    GetBuildResponse.new(request_id: Bottle.RequestId.write(:rpc), build: build)
   end
 
   @spec list_pickable_builds(ListPickableBuildsRequest.t(), GRPC.Server.Stream.t()) :: any
   def list_pickable_builds(_request, stream) do
-    Builds.list()
+    Build.list_builds()
     |> Stream.each(&stream_list_pickable_builds_result(&1, stream))
     |> Stream.run()
   end
@@ -40,19 +37,11 @@ defmodule Assembly.Server do
 
   @spec list_component_demands(ListComponentDemandsRequest.t(), GRPC.Server.Stream.t()) :: any
   def list_component_demands(_request, stream) do
-    Builds.list()
-    |> Stream.transform(nil, fn build, _acc ->
-      {build.build_components, nil}
-    end)
-    |> Enum.into([])
-    |> Enum.reduce(%{}, fn component, list ->
-      current = Map.get(list, component.component_id, 0)
-      Map.put(list, component.component_id, current + component.quantity)
-    end)
+    Build.get_component_demands()
     |> Enum.each(&stream_list_component_demands_result(&1, stream))
   end
 
-  defp stream_list_component_demands_result({component_id, quantity} = res, stream) do
+  defp stream_list_component_demands_result({component_id, quantity}, stream) do
     response =
       ListComponentDemandsResponse.new(
         request_id: Bottle.RequestId.write(:rpc),

@@ -19,6 +19,11 @@ config :logger_json, :backend,
 
 config :grpc, start_server: true
 
+config :assembly, Assembly.InventoryServiceClient,
+  enabled?: false,
+  url: "",
+  ssl: false
+
 config :assembly, Assembly.Tracer,
   service: :assembly,
   adapter: SpandexDatadog.Adapter,
