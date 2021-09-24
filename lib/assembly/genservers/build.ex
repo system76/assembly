@@ -68,7 +68,7 @@ defmodule Assembly.GenServers.Build do
       emit_build_updated(build, %{build | status: new_build_status})
     end
 
-    {:noreply, %{build: %{build | status: new_build_status}}}
+    {:noreply, %{state | build: %{build | status: new_build_status}}}
   end
 
   @impl true

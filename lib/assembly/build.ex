@@ -8,7 +8,7 @@ defmodule Assembly.Build do
 
   require Logger
 
-  alias Assembly.{AdditiveMap, GenServers, Repo, Schemas}
+  alias Assembly.{AdditiveMap, GenServers, Option, Repo, Schemas}
 
   @supervisor Assembly.BuildSupervisor
   @registry Assembly.BuildRegistry
@@ -141,7 +141,8 @@ defmodule Assembly.Build do
         Logger.error("Unable to set build status to inprogress", resource: inspect(changeset))
         {:error, :not_found}
 
-      nil -> {:error, :not_found}
+      nil ->
+        {:error, :not_found}
     end
   end
 
@@ -161,5 +162,30 @@ defmodule Assembly.Build do
     |> DynamicSupervisor.which_children()
     |> Enum.map(fn {_, pid, _type, _modules} -> GenServer.call(pid, :get_demand) end)
     |> Enum.reduce(%{}, &AdditiveMap.merge/2)
+  end
+
+  @doc """
+  Takes an ID, grabs all the components required for it, adds it with any other
+  builds that require the same component, then emits the component demand
+  updated event.
+
+  ## Examples
+
+      iex> emit_component_demands_for_build("123")
+      :ok
+
+  """
+  @spec emit_component_demands_for_build(String.t()) :: :ok
+  def emit_component_demands_for_build(id) do
+    case get_build(id) do
+      nil ->
+        :ok
+
+      build ->
+        build
+        |> Map.get(:options, [])
+        |> Enum.map(&Map.get(&1, :component_id))
+        |> Option.emit_component_demands()
+    end
   end
 end

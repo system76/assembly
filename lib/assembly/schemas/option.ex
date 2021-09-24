@@ -13,13 +13,13 @@ defmodule Assembly.Schemas.Option do
   alias Assembly.Schemas
 
   @type t :: %__MODULE__{
-    id: Ecto.UUID.t(),
-    component_id: String.t(),
-    quantity: non_neg_integer(),
-    build: Schemas.Build.t(),
-    inserted_at: DateTime.t(),
-    updated_at: DateTime.t()
-  }
+          id: Ecto.UUID.t(),
+          component_id: String.t(),
+          quantity: non_neg_integer(),
+          build: Schemas.Build.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
 
   @foreign_key_type :binary_id
   @primary_key {:id, :binary_id, autogenerate: true}

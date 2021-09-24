@@ -13,15 +13,15 @@ defmodule Assembly.Schemas.Build do
   alias Assembly.Schemas
 
   @type t :: %__MODULE__{
-    id: Ecto.UUID.t(),
-    hal_id: integer(),
-    model: String.t(),
-    order_id: String.t(),
-    status: :incomplete | :ready | :inprogress | :built,
-    options: [Schemas.Option.t()],
-    inserted_at: DateTime.t(),
-    updated_at: DateTime.t()
-  }
+          id: Ecto.UUID.t(),
+          hal_id: integer(),
+          model: String.t(),
+          order_id: String.t(),
+          status: :incomplete | :ready | :inprogress | :built,
+          options: [Schemas.Option.t()],
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
 
   @foreign_key_type :binary_id
   @primary_key {:id, :binary_id, autogenerate: true}

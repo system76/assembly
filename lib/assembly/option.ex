@@ -3,7 +3,47 @@ defmodule Assembly.Option do
   Helper functions for handling options.
   """
 
-  alias Assembly.{ComponentCache, Schemas}
+  alias Assembly.{AdditiveMap, Build, ComponentCache, Events, Schemas}
+
+  @doc """
+  Emits component demand events for every known component.
+
+  ## Examples
+
+      iex> emit_component_demands()
+      :ok
+
+  """
+  @spec emit_component_demands() :: :ok
+  def emit_component_demands() do
+    Enum.each(Build.get_component_demands(), fn {component_id, demand} ->
+      Events.broadcast_component_demand(component_id, demand)
+    end)
+  end
+
+  @doc """
+  Emits component demand event for a list of component ids. This will iterate
+  over all builds and add up the demand to get the _total_ demand for the
+  component.
+
+  ## Examples
+
+      iex> emit_component_demands(["A", "B", "C"])
+      :ok
+
+  """
+  @spec emit_component_demands([String.t()]) :: :ok
+  def emit_component_demands(component_ids) do
+    filter = Enum.map(component_ids, &to_string/1)
+
+    filter
+    |> Enum.reduce(%{}, &AdditiveMap.set(&2, &1, 0))
+    |> AdditiveMap.merge(Build.get_component_demands())
+    |> Enum.filter(fn {component_id, _} -> component_id in filter end)
+    |> Enum.each(fn {component_id, demand} ->
+      Events.broadcast_component_demand(component_id, demand)
+    end)
+  end
 
   @doc """
   Returns a list of `Assembly.Schemas.Option` that we do not have enough

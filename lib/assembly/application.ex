@@ -10,6 +10,7 @@ defmodule Assembly.Application do
   def start(_type, _args) do
     children = [
       {SpandexDatadog.ApiServer, [http: HTTPoison, host: "127.0.0.1", batch_size: 2]},
+      {Task.Supervisor, name: Assembly.TaskSupervisor},
       {Cachex, name: Assembly.ComponentCache},
       {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
       {Registry, keys: :unique, name: Assembly.BuildRegistry},
@@ -28,15 +29,13 @@ defmodule Assembly.Application do
     opts = [strategy: :one_for_one, name: Assembly.Supervisor]
 
     with {:ok, pid} <- Supervisor.start_link(children, opts) do
-      warmup()
+      Task.Supervisor.async_nolink(Assembly.TaskSupervisor, fn ->
+        :assembly
+        |> Application.get_env(:warmup)
+        |> apply([])
+      end)
 
       {:ok, pid}
     end
-  end
-
-  defp warmup do
-    :assembly
-    |> Application.get_env(:warmup)
-    |> apply([])
   end
 end

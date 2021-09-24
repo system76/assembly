@@ -67,9 +67,9 @@ defmodule Assembly.Broadway do
     Logger.metadata(build_id: build.id)
     Logger.info("Handling Build Created message")
 
-    build
-    |> Caster.cast()
-    |> Build.create_build()
+    with {:ok, updated_build} <- Build.create_build(Caster.cast(build)) do
+      Build.emit_component_demands_for_build(to_string(updated_build.hal_id))
+    end
   end
 
   def notify_handler({:build_updated, %{new: build}}) do
@@ -81,7 +81,8 @@ defmodule Assembly.Broadway do
         Logger.warn("Trying to update build that doesn't exist in local data")
 
       saved_build ->
-        Build.update_build(saved_build, Caster.cast(build))
+        {:ok, updated_build} = Build.update_build(saved_build, Caster.cast(build))
+        Build.emit_component_demands_for_build(to_string(updated_build.hal_id))
     end
   end
 
@@ -93,8 +94,12 @@ defmodule Assembly.Broadway do
     # the build before anything else.
     Process.sleep(1000)
 
-    with {:error, :not_found} <- Build.pick_build(build.id) do
-      Logger.warn("Trying to pick a build that doesn't exist in local data")
+    case Build.pick_build(build.id) do
+      {:ok, updated_build} ->
+        Build.emit_component_demands_for_build(to_string(updated_build.hal_id))
+
+      {:error, :not_found} ->
+        Logger.warn("Trying to pick a build that doesn't exist in local data")
     end
   end
 

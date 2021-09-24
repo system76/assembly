@@ -10,7 +10,6 @@ defmodule Assembly.Events do
 
   @callback broadcast_build_update(map(), map()) :: :ok
   @callback broadcast_component_demand(String.t(), integer()) :: :ok
-  @callback request_quantity_update() :: :ok
   @callback request_quantity_update(list()) :: :ok
 
   @source "assembly"
@@ -21,7 +20,7 @@ defmodule Assembly.Events do
   end
 
   def broadcast_component_demand(component_id, demand) do
-    message = ComponentDemandUpdated.new(component_id: component_id, demand: demand)
+    message = ComponentDemandUpdated.new(component_id: component_id, quantity: demand)
     Bottle.publish(message, source: @source)
   end
 
@@ -32,8 +31,6 @@ defmodule Assembly.Events do
       ComponentCache.put(resp.component.id, resp.total_available_quantity)
     end)
     |> Stream.run()
-
-    # Builds.recalculate_statues()
 
     :ok
   end

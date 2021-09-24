@@ -11,6 +11,7 @@ defmodule Assembly.BroadwayTest do
   describe ":build_created" do
     test "runs without error" do
       stub(Assembly.MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
+      stub(Assembly.MockEvents, :broadcast_component_demand, fn _, _ -> :ok end)
 
       build = build(:bottle_build, build_components: build_list(2, :bottle_build_component))
       assert Broadway.notify_handler({:build_created, %{build: build}})

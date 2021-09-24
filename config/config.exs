@@ -36,4 +36,6 @@ config :assembly, SpandexDatadog.ApiServer,
 
 config :spandex, :decorators, tracer: Assembly.Tracer
 
+config :lager, error_logger_redirect: false
+
 import_config "#{Mix.env()}.exs"
