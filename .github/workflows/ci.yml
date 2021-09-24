@@ -27,6 +27,12 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
 
+      rabbitmq:
+        image: rabbitmq:3-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: assembly
+          RABBITMQ_DEFAULT_PASS: system76
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -62,6 +68,7 @@ jobs:
         run: mix test
         env:
           DB_HOST: postgres
+          RABBITMQ_HOST: rabbitmq
 
   Format:
     runs-on: ubuntu-latest
