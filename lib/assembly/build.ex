@@ -147,6 +147,26 @@ defmodule Assembly.Build do
   end
 
   @doc """
+  Iterates over all builds and recalculates their status. This is ran after our
+  internal cache of component quantities is updated. This will ignore any build
+  in the `:inprogress` or `:built` status because they can not switch to
+  `:ready` or `:incomplete`.
+
+  ## Examples
+
+      iex> update_build_status()
+      :ok
+
+  """
+  @spec update_build_status() :: :ok
+  def update_build_status() do
+    @supervisor
+    |> DynamicSupervisor.which_children()
+    |> Stream.each(fn {_, pid, _type, _modules} -> send(pid, :update_status) end)
+    |> Stream.run()
+  end
+
+  @doc """
   Iterates over all builds, fetches the component demands of all the selected
   options, and merges them together.
 
