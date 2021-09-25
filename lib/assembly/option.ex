@@ -3,7 +3,7 @@ defmodule Assembly.Option do
   Helper functions for handling options.
   """
 
-  alias Assembly.{AdditiveMap, Build, ComponentCache, Events, Schemas}
+  alias Assembly.{AdditiveMap, Build, ComponentCache, Schemas}
 
   @doc """
   Emits component demand events for every known component.
@@ -17,7 +17,7 @@ defmodule Assembly.Option do
   @spec emit_component_demands() :: :ok
   def emit_component_demands() do
     Enum.each(Build.get_component_demands(), fn {component_id, demand} ->
-      Events.broadcast_component_demand(component_id, demand)
+      events_module().broadcast_component_demand(component_id, demand)
     end)
   end
 
@@ -41,7 +41,7 @@ defmodule Assembly.Option do
     |> AdditiveMap.merge(Build.get_component_demands())
     |> Enum.filter(fn {component_id, _} -> component_id in filter end)
     |> Enum.each(fn {component_id, demand} ->
-      Events.broadcast_component_demand(component_id, demand)
+      events_module().broadcast_component_demand(component_id, demand)
     end)
   end
 
@@ -59,4 +59,6 @@ defmodule Assembly.Option do
   def unavailable_options(options) do
     Enum.reject(options, &(ComponentCache.get(&1.component_id) >= &1.quantity))
   end
+
+  defp events_module, do: Application.get_env(:assembly, :events)
 end
