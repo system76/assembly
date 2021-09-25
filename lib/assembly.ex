@@ -5,17 +5,17 @@ defmodule Assembly do
 
   require Logger
 
+  alias Assembly.{Build, Option}
+
   def warmup do
     Logger.info("Warming up")
 
-    with :ok <- Assembly.Build.warmup_builds() do
-      Assembly.Build.get_component_demands()
+    with :ok <- Build.warmup_builds() do
+      Option.emit_component_demands()
+
+      Build.get_component_demands()
       |> Map.keys()
-      |> request_quantity_update()
+      |> Option.request_component_quantity()
     end
   end
-
-  defp events_module, do: Application.get_env(:assembly, :events)
-
-  defp request_quantity_update(component_ids), do: events_module().request_quantity_update(component_ids)
 end

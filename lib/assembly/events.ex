@@ -5,7 +5,7 @@ defmodule Assembly.Events do
 
   require Logger
 
-  alias Assembly.{ComponentCache, Caster}
+  alias Assembly.Caster
   alias Bottle.Assembly.V1.{BuildUpdated, ComponentDemandUpdated}
 
   @callback broadcast_build_update(map(), map()) :: :ok
@@ -26,16 +26,5 @@ defmodule Assembly.Events do
 
     message = ComponentDemandUpdated.new(component_id: component_id, quantity: demand)
     Bottle.publish(message, source: @source)
-  end
-
-  def request_quantity_update(component_ids \\ []) do
-    component_ids
-    |> Assembly.InventoryService.request_quantity_update()
-    |> Stream.each(fn {:ok, resp} ->
-      ComponentCache.put(resp.component.id, resp.total_available_quantity)
-    end)
-    |> Stream.run()
-
-    :ok
   end
 end

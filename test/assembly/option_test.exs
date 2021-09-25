@@ -1,7 +1,11 @@
 defmodule Assembly.OptionTest do
   use Assembly.DataCase
 
+  import Mox
+
   alias Assembly.{ComponentCache, Option}
+
+  setup :verify_on_exit!
 
   describe "unavailable_components/1" do
     test "returns all build components if we have an empty cache" do

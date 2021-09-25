@@ -46,6 +46,26 @@ defmodule Assembly.Option do
   end
 
   @doc """
+  Updates the `Assembly.ComponentCache` with current available quantity from
+  the inventory service.
+
+  ## Examples
+
+      iex> request_component_quantity(["A", "B", "C"])
+      :ok
+
+  """
+  @spec request_component_quantity([String.t()]) :: :ok
+  def request_component_quantity(component_ids \\ []) do
+    component_ids
+    |> Assembly.InventoryService.request_quantity_update()
+    |> Stream.map(fn {:ok, res} -> res end)
+    |> Stream.map(fn %{component: %{id: k}, total_available_quantity: v} -> {k, v} end)
+    |> Stream.each(fn {k, v} -> ComponentCache.put(k, v) end)
+    |> Stream.run()
+  end
+
+  @doc """
   Returns a list of `Assembly.Schemas.Option` that we do not have enough
   quantity for.
 
