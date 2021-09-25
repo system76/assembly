@@ -19,6 +19,11 @@ config :logger_json, :backend,
 
 config :grpc, start_server: true
 
+config :assembly, Assembly.InventoryServiceClient,
+  enabled?: false,
+  url: "",
+  ssl: false
+
 config :assembly, Assembly.Tracer,
   service: :assembly,
   adapter: SpandexDatadog.Adapter,
@@ -30,5 +35,7 @@ config :assembly, SpandexDatadog.ApiServer,
   host: "127.0.0.1"
 
 config :spandex, :decorators, tracer: Assembly.Tracer
+
+config :lager, error_logger_redirect: false
 
 import_config "#{Mix.env()}.exs"

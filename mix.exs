@@ -10,6 +10,7 @@ defmodule Assembly.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      dialyzer: dialyzer(),
       releases: [
         assembly: [
           include_executables_for: [:unix],
@@ -29,9 +30,16 @@ defmodule Assembly.MixProject do
 
   defp aliases do
     [
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.setup": ["ecto.create", "ecto.migrate"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate", "test"]
+    ]
+  end
+
+  # Setup dialyzer plt files in /priv for easier caching.
+  defp dialyzer do
+    [
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
     ]
   end
 
@@ -39,8 +47,8 @@ defmodule Assembly.MixProject do
   defp deps do
     [
       {:amqp, "~> 2.0", override: true},
-      {:bottle, github: "system76/bottle", ref: "dad2cfe"},
-      {:broadway_rabbitmq, "~> 0.6"},
+      {:bottle, github: "system76/bottle", ref: "969955d"},
+      {:broadway_rabbitmq, "~> 0.7"},
       {:cachex, "~> 3.3"},
       {:cowlib, "~> 2.9.0", override: true},
       {:credo, "~> 1.3", only: [:dev, :test]},

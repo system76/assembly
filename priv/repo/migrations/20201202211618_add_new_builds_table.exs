@@ -2,12 +2,12 @@ defmodule Assembly.Repo.Migrations.AddNewBuildsTable do
   use Ecto.Migration
 
   def change do
-    BuildStatusEnum.create_type()
+    execute "CREATE TYPE status AS ENUM ('incomplete', 'ready', 'built');"
 
     create table(:builds, primary_key: false) do
       add :id, :uuid, primary_key: true
       add :hal_id, :integer, null: false
-      add :status, BuildStatusEnum.type()
+      add :status, :status
 
       timestamps()
     end

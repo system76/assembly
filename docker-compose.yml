@@ -3,10 +3,18 @@
 version: "3"
 
 services:
-  db:
+  postgres:
     image: postgres
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     ports:
       - 5432:5432
+
+  rabbitmq:
+    image: rabbitmq:3-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: assembly
+      RABBITMQ_DEFAULT_PASS: system76
+    ports:
+      - "5672:5672"

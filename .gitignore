@@ -9,6 +9,7 @@
 /doc
 /.fetch
 /log
+/priv/plts
 erl_crash.dump
 *.ez
 *.beam
