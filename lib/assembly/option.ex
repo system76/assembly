@@ -63,8 +63,6 @@ defmodule Assembly.Option do
     |> Stream.map(fn %{component: %{id: k}, total_available_quantity: v} -> {k, v} end)
     |> Stream.each(fn {k, v} -> ComponentCache.put(k, v) end)
     |> Stream.run()
-
-    Build.update_build_status()
   end
 
   @doc """

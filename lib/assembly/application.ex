@@ -5,13 +5,15 @@ defmodule Assembly.Application do
 
   use Application
 
+  import Cachex.Spec, only: [hook: 1]
+
   require Logger
 
   def start(_type, _args) do
     children = [
       {SpandexDatadog.ApiServer, [http: HTTPoison, host: "127.0.0.1", batch_size: 2]},
       {Task.Supervisor, name: Assembly.TaskSupervisor},
-      {Cachex, name: Assembly.ComponentCache},
+      {Cachex, cache_options()},
       {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},
       {Registry, keys: :unique, name: Assembly.BuildRegistry},
       Assembly.Repo,
@@ -37,5 +39,13 @@ defmodule Assembly.Application do
 
       {:ok, pid}
     end
+  end
+
+  defp cache_options do
+    [
+      name: Assembly.ComponentCache,
+      hooks: [hook(module: Assembly.ComponentCache)],
+      ttl: 7 * 24 * 60 * 60 * 1000
+    ]
   end
 end
