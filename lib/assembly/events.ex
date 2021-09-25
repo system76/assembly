@@ -15,11 +15,15 @@ defmodule Assembly.Events do
   @source "assembly"
 
   def broadcast_build_update(old, new) do
+    Logger.info("Broadcasting build update", build_id: new.hal_id)
+
     message = BuildUpdated.new(old: Caster.cast(old), new: Caster.cast(new))
     Bottle.publish(message, source: @source)
   end
 
   def broadcast_component_demand(component_id, demand) do
+    Logger.info("Broadcasting new demand of #{demand}", component_id: component_id)
+
     message = ComponentDemandUpdated.new(component_id: component_id, quantity: demand)
     Bottle.publish(message, source: @source)
   end
