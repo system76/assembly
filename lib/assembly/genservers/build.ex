@@ -32,12 +32,16 @@ defmodule Assembly.GenServers.Build do
 
   @impl true
   def handle_call(:get_demand, _from, %{build: %{options: options}} = state) do
-    demand =
-      Enum.reduce(options, %{}, fn o, map ->
-        AdditiveMap.add(map, o.component_id, o.quantity)
-      end)
+    if state.build.status in [:incomplete, :ready] do
+      demand =
+        Enum.reduce(options, %{}, fn o, map ->
+          AdditiveMap.add(map, o.component_id, o.quantity)
+        end)
 
-    {:reply, demand, state}
+      {:reply, demand, state}
+    else
+      {:reply, %{}, state}
+    end
   end
 
   @impl true
