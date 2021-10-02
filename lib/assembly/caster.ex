@@ -10,9 +10,9 @@ defmodule Assembly.Caster do
       order_id: to_string(build.order.id),
       status: parse_status(build.status),
       options:
-        maybe_map(build.build_components, fn c ->
-          %{component_id: c.component.id, quantity: c.quantity}
-        end),
+        build.build_components
+        |> maybe_map(&%{component_id: &1.component.id, quantity: &1.quantity})
+        |> Enum.sort_by(& &1.component_id),
       inserted_at: build.created_at,
       updated_at: build.updated_at
     }
@@ -25,9 +25,9 @@ defmodule Assembly.Caster do
       order: %{id: build.order_id},
       status: parse_status(build.status),
       build_components:
-        maybe_map(build.options, fn o ->
-          %{component: %{id: to_string(o.component_id)}, quantity: o.quantity}
-        end),
+        build.options
+        |> maybe_map(&%{component: %{id: to_string(&1.component_id)}, quantity: &1.quantity})
+        |> Enum.sort_by(& &1.component.id),
       missing_components: [],
       created_at: to_string(build.inserted_at),
       updated_at: to_string(build.updated_at)

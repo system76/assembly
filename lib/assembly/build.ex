@@ -62,6 +62,8 @@ defmodule Assembly.Build do
       [{pid, _value}] -> GenServer.call(pid, :get_info)
       _ -> nil
     end
+  catch
+    :exit, {:normal, _} -> :ok
   end
 
   @doc """
@@ -81,7 +83,8 @@ defmodule Assembly.Build do
   def create_build(attrs) do
     with changeset <- Schemas.Build.changeset(%Schemas.Build{}, attrs),
          {:ok, build} <- Repo.insert(changeset),
-         {:ok, _pid} <- DynamicSupervisor.start_child(@supervisor, {GenServers.Build, build}) do
+         preloaded_build <- Repo.preload(build, [:options]),
+         {:ok, _pid} <- DynamicSupervisor.start_child(@supervisor, {GenServers.Build, preloaded_build}) do
       {:ok, build}
     end
   end
@@ -103,15 +106,16 @@ defmodule Assembly.Build do
   @spec update_build(Schemas.Build.t(), map()) :: {:ok, Schemas.Build.t()} | {:error, Ecto.Changeset.t()}
   def update_build(build, attrs) do
     with %{changes: changes} = changeset when map_size(changes) > 0 <- Schemas.Build.changeset(build, attrs),
-         {:ok, updated_build} <- Repo.update(changeset) do
-      case Registry.lookup(@registry, to_string(updated_build.hal_id)) do
+         {:ok, updated_build} <- Repo.update(changeset),
+         preloaded_build <- Repo.preload(updated_build, [:options]) do
+      case Registry.lookup(@registry, to_string(preloaded_build.hal_id)) do
         [{pid, _value}] ->
-          GenServer.cast(pid, {:update_build, updated_build})
-          {:ok, updated_build}
+          GenServer.cast(pid, {:update_build, preloaded_build})
+          {:ok, preloaded_build}
 
         _ ->
-          DynamicSupervisor.start_child(@supervisor, {GenServers.Build, updated_build})
-          {:ok, updated_build}
+          DynamicSupervisor.start_child(@supervisor, {GenServers.Build, preloaded_build})
+          {:ok, preloaded_build}
       end
     else
       # No-op if no changes occure. Avoids sending build updated messages on the
@@ -134,7 +138,7 @@ defmodule Assembly.Build do
   @spec pick_build(String.t()) :: {:ok, Schemas.Build.t()} | {:error, :not_found}
   def pick_build(id) do
     with build when not is_nil(build) <- get_build(id),
-         {:ok, updated_build} <- update_build(build, %{status: :inprogress}) do
+         {:ok, updated_build} <- update_build(build, %{"status" => "inprogress"}) do
       {:ok, updated_build}
     else
       {:error, changeset} ->
@@ -198,14 +202,16 @@ defmodule Assembly.Build do
   @spec emit_component_demands_for_build(String.t()) :: :ok
   def emit_component_demands_for_build(id) do
     case get_build(id) do
-      nil ->
+      %{options: %Ecto.Association.NotLoaded{}} ->
         :ok
 
-      build ->
-        build
-        |> Map.get(:options, [])
+      %{options: options} ->
+        options
         |> Enum.map(&Map.get(&1, :component_id))
         |> Option.emit_component_demands()
+
+      _ ->
+        :ok
     end
   end
 end

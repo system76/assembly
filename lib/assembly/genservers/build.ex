@@ -9,7 +9,7 @@ defmodule Assembly.GenServers.Build do
 
   require Logger
 
-  alias Assembly.{AdditiveMap, Option, Schemas}
+  alias Assembly.{AdditiveMap, Option, Repo, Schemas}
 
   def start_link(%Schemas.Build{} = build) do
     GenServer.start_link(__MODULE__, build, name: name(build))
@@ -53,7 +53,7 @@ defmodule Assembly.GenServers.Build do
 
   @impl true
   def handle_cast({:update_build, build}, state) do
-    Logger.info("Updating build data")
+    Logger.info("Updating build data", resource: inspect(%{old: state.build, new: build}))
     emit_build_updated(state.build, build)
     Process.send_after(self(), :update_status, 0)
     {:noreply, %{state | build: build}}
@@ -64,15 +64,23 @@ defmodule Assembly.GenServers.Build do
     new_build_status =
       case Option.unavailable_options(build.options) do
         [] -> :ready
-        _missing_components -> :incomplete
+        _missing_options -> :incomplete
       end
 
     if new_build_status != build.status do
       Logger.info("Updating build status to #{new_build_status}")
-      emit_build_updated(build, %{build | status: new_build_status})
-    end
 
-    {:noreply, %{state | build: %{build | status: new_build_status}}}
+      new_build =
+        build
+        |> Schemas.Build.changeset(%{"status" => to_string(new_build_status)})
+        |> Repo.update!()
+        |> Repo.preload([:options])
+
+      emit_build_updated(build, new_build)
+      {:noreply, %{state | build: new_build}}
+    else
+      {:noreply, state}
+    end
   end
 
   @impl true

@@ -66,6 +66,9 @@ defmodule Assembly.BuildsTest do
       %{component_id: cid} = option = params_with_assocs(:option) |> Map.drop([:build_id])
 
       assert {:ok, build} = Build.update_build(build, %{options: [option]})
+
+      Process.sleep(10)
+
       assert %{component_id: ^cid} = Repo.get_by(Schemas.Option, build_id: build.id)
     end
 

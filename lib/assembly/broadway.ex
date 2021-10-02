@@ -65,7 +65,7 @@ defmodule Assembly.Broadway do
 
   def notify_handler({:build_created, %{build: build}}) do
     Logger.metadata(build_id: build.id)
-    Logger.info("Handling Build Created message")
+    Logger.info("Handling Build Created message", resource: inspect(build))
 
     with {:ok, updated_build} <- Build.create_build(Caster.cast(build)) do
       Build.emit_component_demands_for_build(to_string(updated_build.hal_id))
@@ -74,7 +74,7 @@ defmodule Assembly.Broadway do
 
   def notify_handler({:build_updated, %{new: build}}) do
     Logger.metadata(build_id: build.id)
-    Logger.info("Handling Build Updated message")
+    Logger.info("Handling Build Updated message", resource: inspect(build))
 
     case Build.get_build(build.id) do
       nil ->
@@ -88,7 +88,7 @@ defmodule Assembly.Broadway do
 
   def notify_handler({:build_picked, %{build: build}}) do
     Logger.metadata(build_id: build.id)
-    Logger.info("Handling Build Picked message")
+    Logger.info("Handling Build Picked message", resource: inspect(build))
 
     # We delay 30 seconds here to ensure that the Warehouse service assigns the
     # parts to the build before anything else.

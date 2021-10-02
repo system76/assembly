@@ -10,7 +10,7 @@ defmodule Assembly.GenServers.BuildTest do
 
   describe ":get_info" do
     test "returns data for build" do
-      build = build(:build, options: build_list(4, :option))
+      build = insert(:build, options: build_list(4, :option))
       {:ok, pid} = start_supervised({Build, build})
       assert build == GenServer.call(pid, :get_info)
     end
@@ -20,7 +20,7 @@ defmodule Assembly.GenServers.BuildTest do
     test "returns quantity of component demand" do
       option_one = build(:option, component_id: "A", quantity: 4)
       option_two = build(:option, component_id: "B", quantity: 2)
-      build = build(:build, options: [option_one, option_two])
+      build = insert(:build, options: [option_one, option_two])
       {:ok, pid} = start_supervised({Build, build})
 
       demand = GenServer.call(pid, :get_demand)
@@ -33,7 +33,7 @@ defmodule Assembly.GenServers.BuildTest do
     test "with status built stops genserver" do
       expect(Assembly.MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
 
-      build = build(:build, options: [], status: :incomplete)
+      build = insert(:build, options: [], status: :incomplete)
       {:ok, pid} = start_supervised({Build, build})
 
       GenServer.cast(pid, {:update_build, %{build | status: :built}})
@@ -45,7 +45,7 @@ defmodule Assembly.GenServers.BuildTest do
     test "data field updates set the internal data" do
       expect(Assembly.MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
 
-      build = build(:build, model: "old", options: [], status: :incomplete)
+      build = insert(:build, model: "old", options: [], status: :incomplete)
       {:ok, pid} = start_supervised({Build, build})
 
       assert :ok == GenServer.cast(pid, {:update_build, %{build | model: "new"}})
@@ -56,7 +56,7 @@ defmodule Assembly.GenServers.BuildTest do
     test "build with no options is set to ready status" do
       expect(Assembly.MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
 
-      build = build(:build, options: [], status: :incomplete)
+      build = insert(:build, options: [], status: :incomplete)
       {:ok, pid} = start_supervised({Build, build})
 
       Process.sleep(10)
@@ -69,7 +69,7 @@ defmodule Assembly.GenServers.BuildTest do
       expect(Assembly.MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
 
       option = build(:option)
-      build = build(:build, options: [option], status: :ready)
+      build = insert(:build, options: [option], status: :ready)
       {:ok, pid} = start_supervised({Build, build})
 
       Process.sleep(10)
@@ -83,7 +83,7 @@ defmodule Assembly.GenServers.BuildTest do
 
       option = build(:option)
       Assembly.ComponentCache.put(option.component_id, 1)
-      build = build(:build, options: [option], status: :incomplete)
+      build = insert(:build, options: [option], status: :incomplete)
       {:ok, pid} = start_supervised({Build, build})
 
       Process.sleep(10)

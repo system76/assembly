@@ -18,7 +18,7 @@ defmodule Assembly.Schemas.Build do
           model: String.t(),
           order_id: String.t(),
           status: :incomplete | :ready | :inprogress | :built,
-          options: [Schemas.Option.t()],
+          options: [Schemas.Option.t()] | Ecto.Association.NotLoaded.t(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }

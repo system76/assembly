@@ -35,7 +35,7 @@ defmodule Assembly.Schemas.Option do
 
   def changeset(%__MODULE__{} = build_component, params) do
     build_component
-    |> cast(params, [:build_id, :component_id, :quantity])
+    |> cast(params, [:id, :build_id, :component_id, :quantity])
     |> validate_required([:component_id, :quantity])
     |> assoc_constraint(:build)
   end

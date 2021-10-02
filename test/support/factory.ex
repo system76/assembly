@@ -37,7 +37,6 @@ defmodule Assembly.Factory do
 
   def option_factory do
     %Schemas.Option{
-      build: build(:build),
       component_id: sequence(:component_id, &"123#{&1}"),
       quantity: 1
     }
