@@ -90,9 +90,9 @@ defmodule Assembly.Broadway do
     Logger.metadata(build_id: build.id)
     Logger.info("Handling Build Picked message", resource: inspect(build))
 
-    # We delay 30 seconds here to ensure that the Warehouse service assigns the
+    # We delay 5 seconds here to ensure that the Warehouse service assigns the
     # parts to the build before anything else.
-    Process.sleep(30_000)
+    Process.sleep(5_000)
 
     case Build.pick_build(build.id) do
       {:ok, updated_build} ->
