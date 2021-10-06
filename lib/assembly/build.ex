@@ -151,6 +151,27 @@ defmodule Assembly.Build do
   end
 
   @doc """
+  Deletes a build currently in queue. This will delete it from the database, but
+  also stop the GenServer and recalculate the demand for components.
+
+  ## Examples
+
+      iex> delete_build(id)
+      {:ok, %Schemas.Build{}}
+
+  """
+  @spec delete_build(String.t()) :: {:ok, Schemas.Build.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found}
+  def delete_build(id) do
+    with build when not is_nil(build) <- get_build(id),
+         [{pid, _value}] <- Registry.lookup(@registry, to_string(id)) do
+      GenServer.cast(pid, :delete_build)
+      Repo.delete(build)
+    else
+      [] -> {:error, :not_found}
+    end
+  end
+
+  @doc """
   Iterates over all builds and recalculates their status. This is ran after our
   internal cache of component quantities is updated. This will ignore any build
   in the `:inprogress` or `:built` status because they can not switch to

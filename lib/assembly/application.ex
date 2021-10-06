@@ -12,6 +12,7 @@ defmodule Assembly.Application do
   def start(_type, _args) do
     children = [
       {SpandexDatadog.ApiServer, [http: HTTPoison, host: "127.0.0.1", batch_size: 2]},
+      Assembly.Demand,
       {Task.Supervisor, name: Assembly.TaskSupervisor},
       {Cachex, cache_options()},
       {DynamicSupervisor, name: Assembly.BuildSupervisor, strategy: :one_for_one},

@@ -9,7 +9,7 @@ defmodule Assembly.GenServers.Build do
 
   require Logger
 
-  alias Assembly.{AdditiveMap, Option, Repo, Schemas}
+  alias Assembly.{AdditiveMap, Demand, Option, Repo, Schemas}
 
   def start_link(%Schemas.Build{} = build) do
     GenServer.start_link(__MODULE__, build, name: name(build))
@@ -21,7 +21,10 @@ defmodule Assembly.GenServers.Build do
   @impl true
   def init(%Schemas.Build{} = build) do
     Logger.metadata(build_id: build.hal_id)
+
+    emit_component_demands(build)
     Process.send_after(self(), :update_status, 0)
+
     {:ok, %{build: build}}
   end
 
@@ -47,16 +50,31 @@ defmodule Assembly.GenServers.Build do
   @impl true
   def handle_cast({:update_build, %{status: :built} = build}, state) do
     Logger.info("Stopping GenServer due to built status")
+
     emit_build_updated(state.build, build)
+    emit_component_demands(state.build)
+
     {:stop, :normal, state}
   end
 
   @impl true
   def handle_cast({:update_build, build}, state) do
     Logger.info("Updating build data", resource: inspect(%{old: state.build, new: build}))
+
     emit_build_updated(state.build, build)
+    emit_component_demands(state.build)
     Process.send_after(self(), :update_status, 0)
+
     {:noreply, %{state | build: build}}
+  end
+
+  @impl true
+  def handle_cast(:delete_build, state) do
+    Logger.info("Stopping GenServer due to build being deleted")
+
+    emit_component_demands(state.build)
+
+    {:stop, :normal, state}
   end
 
   @impl true
@@ -88,6 +106,21 @@ defmodule Assembly.GenServers.Build do
 
   defp emit_build_updated(old_build, new_build) do
     events_module().broadcast_build_update(old_build, new_build)
+  end
+
+  defp emit_component_demands(build) do
+    case build do
+      %{options: %Ecto.Association.NotLoaded{}} ->
+        :ok
+
+      %{options: options} ->
+        options
+        |> Enum.map(& &1.component_id)
+        |> Enum.each(&Demand.emit_component/1)
+
+      _ ->
+        :ok
+    end
   end
 
   defp events_module, do: Application.get_env(:assembly, :events)
