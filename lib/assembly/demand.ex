@@ -6,45 +6,22 @@ defmodule Assembly.Demand do
   services.
   """
 
-  @timeout 30_000
+  @timeout 5_000
 
   use GenServer
 
   alias Assembly.{Build, Option}
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, name: __MODULE__)
+  def start_link(opts) do
+    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
   end
 
   @impl true
-  def init(_) do
+  def init(_opts) do
     {:ok,
      %{
        timers: %{}
      }}
-  end
-
-  @doc """
-  Iterates over all of the options attached to a build, and emits demand
-  quantity for each of the components. This will use the starndard debounce.
-
-  ## Examples
-
-      iex> emit_build(id)
-      :ok
-
-  """
-  @spec emit_build(String.t()) :: :ok | {:error, :not_found}
-  def emit_build(build_id) do
-    case Build.get_build(build_id) do
-      nil ->
-        {:error, :not_found}
-
-      build ->
-        build.options
-        |> Enum.map(& &1.component_id)
-        |> Enum.each(&emit_component/1)
-    end
   end
 
   @doc """
@@ -74,7 +51,7 @@ defmodule Assembly.Demand do
         Option.emit_component_demands([component_id])
         {:noreply, %{state | timers: Map.delete(state.timers, component_id)}}
 
-      _ ->
+      _id ->
         {:noreply, state}
     end
   end

@@ -114,6 +114,9 @@ defmodule Assembly.GenServers.Build do
         :ok
 
       %{options: options} ->
+        # We iterate over all the options now so if the build gets stopped
+        # (like it does once it's built), we can still iterate over all the data
+        # and decrease our demand.
         options
         |> Enum.map(& &1.component_id)
         |> Enum.each(&Demand.emit_component/1)
