@@ -32,7 +32,9 @@ defmodule Assembly.Schemas.Build do
     field :order_id, :string
     field :status, Ecto.Enum, values: [:incomplete, :ready, :inprogress, :built]
 
-    has_many :options, Schemas.Option, on_replace: :delete
+    has_many :options, Schemas.Option,
+      on_delete: :delete_all,
+      on_replace: :delete
 
     timestamps()
   end

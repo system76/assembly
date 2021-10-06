@@ -115,6 +115,16 @@ defmodule Assembly.BuildsTest do
     end
   end
 
+  describe "delete_build/1" do
+    test "deletes the database record" do
+      stub(Assembly.MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
+
+      build = :build |> insert(options: build_list(2, :option)) |> supervise()
+      assert {:ok, build} = Build.delete_build(build.hal_id)
+      assert nil == Repo.get(Schemas.Build, build.id)
+    end
+  end
+
   describe "get_component_demands/0" do
     test "merges demand from every build" do
       stub(Assembly.MockEvents, :broadcast_build_update, fn _, _ -> :ok end)
