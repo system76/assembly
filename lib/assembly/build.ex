@@ -8,7 +8,11 @@ defmodule Assembly.Build do
 
   require Logger
 
-  alias Assembly.{AdditiveMap, GenServers, Option, Repo, Schemas}
+  alias Assembly.AdditiveMap
+  alias Assembly.GenServers
+  alias Assembly.Option
+  alias Assembly.Schemas
+  alias Assembly.Repo
 
   @supervisor Assembly.BuildSupervisor
   @registry Assembly.BuildRegistry
@@ -137,7 +141,7 @@ defmodule Assembly.Build do
   """
   @spec pick_build(String.t()) :: {:ok, Schemas.Build.t()} | {:error, :not_found}
   def pick_build(id) do
-    with build when not is_nil(build) <- get_build(id),
+    with build when not is_nil(build) <- Repo.get_by(Schemas.Build, hal_id: id),
          {:ok, updated_build} <- update_build(build, %{"status" => "inprogress"}) do
       {:ok, updated_build}
     else
