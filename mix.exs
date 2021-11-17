@@ -39,6 +39,7 @@ defmodule Assembly.MixProject do
   # Setup dialyzer plt files in /priv for easier caching.
   defp dialyzer do
     [
+      ignore_warnings: ".dialyzer_ignore.exs",
       plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
     ]
   end

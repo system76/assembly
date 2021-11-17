@@ -10,7 +10,7 @@ defmodule Assembly.Demand do
 
   use GenServer
 
-  alias Assembly.{Build, Option}
+  alias Assembly.Option
 
   def start_link(opts) do
     GenServer.start_link(__MODULE__, opts, name: __MODULE__)
