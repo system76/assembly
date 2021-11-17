@@ -111,7 +111,7 @@ defmodule Assembly.BuildsTest do
     end
 
     test "returns not found error if build is not pickable" do
-      assert {:error, :not_found} = Build.pick_build("nope")
+      assert {:error, :not_found} = Build.pick_build("0000")
     end
   end
 
