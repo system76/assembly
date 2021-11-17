@@ -11,9 +11,6 @@ defmodule Assembly.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: dialyzer(),
-      preferred_cli_env: [
-        dialyzer: :test
-      ],
       releases: [
         assembly: [
           include_executables_for: [:unix],
