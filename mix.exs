@@ -11,6 +11,9 @@ defmodule Assembly.MixProject do
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: dialyzer(),
+      preferred_cli_env: [
+        dialyzer: :test
+      ],
       releases: [
         assembly: [
           include_executables_for: [:unix],
@@ -39,6 +42,7 @@ defmodule Assembly.MixProject do
   # Setup dialyzer plt files in /priv for easier caching.
   defp dialyzer do
     [
+      ignore_warnings: ".dialyzer_ignore.exs",
       plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
     ]
   end
