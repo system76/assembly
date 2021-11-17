@@ -166,15 +166,17 @@ defmodule Assembly.Build do
   """
   @spec delete_build(String.t()) :: {:ok, Schemas.Build.t()} | {:error, Ecto.Changeset.t()} | {:error, :not_found}
   def delete_build(id) do
-    with build when not is_nil(build) <- Repo.get_by(Schemas.Build, hal_id: id) do
-      case Registry.lookup(@registry, to_string(id)) do
-        [{pid, _value}] -> GenServer.cast(pid, :delete_build)
-        _other -> :noop
-      end
+    case Repo.get_by(Schemas.Build, hal_id: id) do
+      build when not is_nil(build) ->
+        case Registry.lookup(@registry, to_string(id)) do
+          [{pid, _value}] -> GenServer.cast(pid, :delete_build)
+          _other -> :noop
+        end
 
-      Repo.delete(build)
-    else
-      nil -> {:error, :not_found}
+        Repo.delete(build)
+
+      nil ->
+        {:error, :not_found}
     end
   end
 

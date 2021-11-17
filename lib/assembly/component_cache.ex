@@ -59,10 +59,11 @@ defmodule Assembly.ComponentCache do
   @doc """
   A `Cachex.Hook` that handles notify builds when anything changes.
   """
-  def handle_notify({action, _params} = msg, _results, _last) when action in [:put, :clear] do
-    Assembly.Build.update_build_status()
+  def handle_notify({action, _params} = msg, _results, _last) do
+    if action in [:put, :clear] do
+      Assembly.Build.update_build_status()
+    end
+
     {:ok, msg}
   end
-
-  def handle_notify(msg, _, _), do: {:ok, msg}
 end
