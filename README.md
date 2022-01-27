@@ -61,6 +61,21 @@ First, make sure you are running the dependency services with `docker-compose`:
 docker-compose up
 ```
 
+Tools and language versions required for development can be installed with [asdf](https://github.com/asdf-vm/asdf):
+
+```shell
+# Install asdf plugins
+asdf plugin-add grpcurl https://github.com/asdf-community/asdf-grpcurl.git
+asdf plugin add erlang https://github.com/asdf-vm/asdf-erlang.git
+asdf plugin-add elixir https://github.com/asdf-vm/asdf-elixir.git
+# Install required tool versions on this project directory
+# Only needed once, getting into this directory will make asdf automatically
+# activate the versions from .tool-versions.
+asdf install
+```
+
+Read more on [http://asdf-vm.com/](http://asdf-vm.com/) for usage information.
+
 Dependencies are managed via `mix`. In the repo, run:
 
 ```shell
