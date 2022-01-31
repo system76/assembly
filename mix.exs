@@ -47,27 +47,24 @@ defmodule Assembly.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:amqp, "~> 2.0", override: true},
-      {:bottle, github: "system76/bottle", ref: "1a25526"},
-      {:broadway_rabbitmq, "~> 0.7"},
-      {:cachex, "~> 3.3"},
+      {:bottle, github: "system76/bottle", ref: "b3d741d"},
+      {:broadway_rabbitmq, "~> 0.7.1"},
+      {:cachex, "~> 3.4"},
       {:cowlib, "~> 2.9.0", override: true},
-      {:credo, "~> 1.3", only: [:dev, :test]},
-      {:decorator, "~> 1.2"},
+      {:credo, "~> 1.6", only: [:dev, :test]},
+      {:decorator, "~> 1.4"},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
-      {:ecto_sql, "~> 3.5"},
-      {:elixir_uuid, "~> 1.2"},
+      {:ecto_sql, "~> 3.7"},
       {:ex_machina, "~> 2.4", only: :test},
       {:hackney, "~> 1.16"},
       {:httpoison, "~> 1.8"},
       {:jason, "~> 1.2", override: true},
-      {:logger_json, github: "Nebo15/logger_json", ref: "8e4290a"},
+      {:logger_json, "~> 4.3"},
       {:mox, "~> 1.0", only: :test},
-      {:postgrex, "~> 0.15.7"},
-      {:saxy, "~> 1.1"},
-      {:spandex_datadog, "~> 1.1"},
-      {:spandex, "~> 3.0.3"},
+      {:postgrex, "~> 0.16.1"},
+      {:spandex_datadog, "~> 1.2"},
+      {:spandex, "~> 3.1.0"},
       {:telemetry, "~> 0.4"}
     ]
   end
