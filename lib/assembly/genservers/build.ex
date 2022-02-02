@@ -35,16 +35,28 @@ defmodule Assembly.GenServers.Build do
 
   @impl true
   def handle_call(:get_demand, _from, %{build: %{options: options}} = state) do
-    if state.build.status in [:incomplete, :ready] do
-      demand =
-        Enum.reduce(options, %{}, fn o, map ->
-          AdditiveMap.add(map, o.component_id, o.quantity)
-        end)
+    Logger.debug("got get_demand for build #{inspect(state.build)}")
 
-      {:reply, demand, state}
-    else
-      {:reply, %{}, state}
-    end
+    demand =
+      cond do
+        state.build.status in [:incomplete, :ready] ->
+          build_demand_response(options)
+
+        state.build.status == :inprogress ->
+          # We send demand for parts  that are not available, assuming
+          # they have not been picked. In case parts are not picked for any other reason
+          # and build is benched, this will decrease the demand and result in an incorrect value.
+          # FIXME: Send picking status of every option.
+          unavailable_options = Option.unavailable_options(options)
+          build_demand_response(unavailable_options)
+
+        true ->
+          %{}
+      end
+
+    Logger.debug("get_demand returned demand #{inspect(demand)}")
+
+    {:reply, demand, state}
   end
 
   @impl true
@@ -103,6 +115,12 @@ defmodule Assembly.GenServers.Build do
 
   @impl true
   def handle_info(:update_status, state), do: {:noreply, state}
+
+  defp build_demand_response(options) do
+    Enum.reduce(options, %{}, fn o, map ->
+      AdditiveMap.add(map, o.component_id, o.quantity)
+    end)
+  end
 
   defp emit_build_updated(old_build, new_build) do
     events_module().broadcast_build_update(old_build, new_build)

@@ -58,3 +58,6 @@ tags
 .vim
 
 # End of https://www.gitignore.io/api/elixir,linux,vim
+
+# Local configs to connect to deployed envs, useful for debugging.
+config/*.local.exs

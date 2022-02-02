@@ -27,6 +27,24 @@ defmodule Assembly.GenServers.BuildTest do
       assert 4 == AdditiveMap.get(demand, option_one.component_id)
       assert 2 == AdditiveMap.get(demand, option_two.component_id)
     end
+
+    test "doesn't return demand for unavailable components" do
+      option_one = build(:option, component_id: Ecto.UUID.autogenerate(), quantity: 4)
+      # there is available quantity for option_one
+      Assembly.ComponentCache.put(option_one.component_id, 4)
+
+      option_two = build(:option, component_id: Ecto.UUID.autogenerate(), quantity: 2)
+      # no available quantity for option_two
+      Assembly.ComponentCache.put(option_two.component_id, 0)
+
+      build = insert(:build, status: :inprogress, options: [option_one, option_two])
+      {:ok, pid} = start_supervised({Build, build})
+
+      demand = GenServer.call(pid, :get_demand)
+
+      refute Map.has_key?(demand, option_one.component_id)
+      assert 2 == AdditiveMap.get(demand, option_two.component_id)
+    end
   end
 
   describe ":update_build" do
