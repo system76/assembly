@@ -117,8 +117,12 @@ defmodule Assembly.Build do
     else
       # No-op if no changes occur. Avoids sending build updated messages on the
       # queue, recalculating status, etc.
-      %{errors: []} -> {:ok, build}
-      %{changes: _} = changeset -> {:error, changeset}
+      %{errors: []} ->
+        {:ok, build}
+
+      %{changes: _} = changeset ->
+        {:error, changeset}
+
       error ->
         Logger.error("unexpected error occurred while updating build: #{inspect(error)}")
         {:error, error}
