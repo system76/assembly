@@ -112,7 +112,7 @@ defmodule Assembly.Build do
     with %{changes: changes} = changeset when map_size(changes) > 0 <- Schemas.Build.changeset(build, attrs),
          {:ok, updated_build} <- Repo.update(changeset),
          preloaded_build <- Repo.preload(updated_build, [:options]),
-         {:ok, _} <- update_registry_build(preloaded_build) do
+         {:ok, _} <- update_preloaded_build(preloaded_build) do
       {:ok, preloaded_build}
     else
       # No-op if no changes occur. Avoids sending build updated messages on the
@@ -123,7 +123,7 @@ defmodule Assembly.Build do
     end
   end
 
-  defp update_preloaded_build(preloaded_build) do # TODO rename
+  defp update_preloaded_build(preloaded_build) do
     case Registry.lookup(@registry, to_string(preloaded_build.hal_id)) do
       [{pid, _value}] ->
         GenServer.cast(pid, {:update_build, preloaded_build})
