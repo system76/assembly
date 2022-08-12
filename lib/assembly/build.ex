@@ -119,7 +119,9 @@ defmodule Assembly.Build do
       # queue, recalculating status, etc.
       %{errors: []} -> {:ok, build}
       %{changes: _} = changeset -> {:error, changeset}
-      error -> Logger.error("unexpected error occurred while updating build: #{inspect(error)}")
+      error ->
+        Logger.error("unexpected error occurred while updating build: #{inspect(error)}")
+        {:error, error}
     end
   end
 
