@@ -52,7 +52,7 @@ defmodule Assembly.MixProject do
       {:broadway_rabbitmq, "~> 0.7"},
       {:cachex, "~> 3.3"},
       {:cowlib, "~> 2.9.0", override: true},
-      {:credo, "~> 1.3", only: [:dev, :test]},
+      {:credo, "~> 1.6.7", only: [:dev, :test]},
       {:decorator, "~> 1.2"},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
