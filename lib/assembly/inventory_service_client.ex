@@ -29,10 +29,6 @@ defmodule Assembly.InventoryServiceClient do
         Logger.error("Assembly.InventoryServiceClient could not connect: #{error}")
         Process.sleep(5000)
         init(%{})
-
-      e ->
-        Logger.error("Assembly.InventoryServiceClient could not connect: #{inspect(e)}")
-        :ignore
     end
   end
 
@@ -44,9 +40,6 @@ defmodule Assembly.InventoryServiceClient do
       {:ok, channel} ->
         Logger.info("Assembly.InventoryServiceClient reconnected")
         {:noreply, channel}
-      _ ->
-        Logger.error("init failed")
-        {:noreply, state}
     end
   end
 
