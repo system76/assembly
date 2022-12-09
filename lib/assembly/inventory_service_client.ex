@@ -44,6 +44,7 @@ defmodule Assembly.InventoryServiceClient do
       {:ok, channel} ->
         Logger.info("Assembly.InventoryServiceClient reconnected")
         {:noreply, channel}
+
       _ ->
         Logger.error("init failed")
         {:noreply, state}
