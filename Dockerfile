@@ -1,4 +1,4 @@
-FROM elixir:1.13-alpine as build
+FROM elixir:1.11-alpine as build
 
 # Install deps
 RUN set -xe; \
@@ -7,11 +7,11 @@ RUN set -xe; \
         g++ \
         gcc \
         git \
-        libmcrypt \
-        libmcrypt-dev \
         make \
         musl-dev \
+        python3 \
         tzdata;
+
 # Use the standard /usr/local/src destination
 RUN mkdir -p /usr/local/src/assembly
 
@@ -38,9 +38,6 @@ RUN set -xe; \
     apk add --update  --no-cache --virtual .runtime-deps \
         ca-certificates \
         libmcrypt \
-        libmcrypt-dev \
-        openssl \
-        libstdc++ \
         ncurses-libs \
         tzdata;
 
