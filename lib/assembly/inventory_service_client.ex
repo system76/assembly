@@ -18,35 +18,36 @@ defmodule Assembly.InventoryServiceClient do
 
   @impl true
   def init(_) do
-    Logger.debug("Assembly.InventoryServiceClient initializing, connecting to gateway at #{config(:url)}")
+    Logger.debug("Assembly.InventoryServiceClient connecting to gateway at #{config(:url)}")
 
     case GRPC.Stub.connect(config(:url), inventory_service_options()) do
-      {:ok, channel} ->
-        Logger.info("Assembly.InventoryServiceClient initialized")
-        {:ok, channel}
-
       {:error, error} ->
         Logger.error("Assembly.InventoryServiceClient could not connect: #{error}")
         Process.sleep(5000)
         init(%{})
+
+      channel ->
+        Logger.debug("Assembly.InventoryServiceClient connected")
+        {:ok, channel}
     end
   end
 
   @impl true
-  def handle_info(t, state) when is_tuple(t) and elem(t, 0) == :gun_down do
-    Logger.error("Assembly.InventoryServiceClient disconnected via gun, attempting to reconnect...")
+  def handle_info({:gun_down, _, _, _, _}, _state) do
+    Logger.debug("Assembly.InventoryServiceClient disconnected")
 
-    case init(%{}) do
-      {:ok, channel} ->
-        Logger.info("Assembly.InventoryServiceClient reconnected")
-        {:noreply, channel}
+    with {:ok, channel} <- init(%{}) do
+      {:noreply, channel}
     end
   end
 
   @impl true
-  def handle_info(t, state) when is_tuple(t) and elem(t, 0) == :gun_up do
-    Logger.debug("Assembly.InventoryServiceClient connected via gun")
-    {:noreply, state}
+  def handle_info({:gun_up, _, _, _, _}, _state) do
+    Logger.debug("Assembly.InventoryServiceClient connected")
+
+    with {:ok, channel} <- init(%{}) do
+      {:noreply, channel}
+    end
   end
 
   @impl true
