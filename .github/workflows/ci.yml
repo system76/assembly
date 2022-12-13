@@ -15,7 +15,7 @@ on:
 
 jobs:
   Test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     container:
       image: elixir:1.11-alpine
@@ -71,7 +71,7 @@ jobs:
           RABBITMQ_HOST: rabbitmq
 
   Format:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     container:
       image: elixir:1.11-alpine
@@ -95,7 +95,7 @@ jobs:
         run: mix format --check-formatted
 
   Credo:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     container:
       image: elixir:1.11-alpine
@@ -135,7 +135,7 @@ jobs:
         run: mix credo
 
   Dialyzer:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Checkout Code
