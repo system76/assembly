@@ -33,7 +33,7 @@ defmodule Assembly.InventoryServiceClient do
   end
 
   @impl true
-  def handle_info(t, _state) when is_tuple(t) and elem(t, 0) == :gun_down do
+  def handle_info(t, state) when is_tuple(t) and elem(t, 0) == :gun_down do
     Logger.error("Assembly.InventoryServiceClient disconnected via gun, attempting to reconnect...")
 
     case init(%{}) do

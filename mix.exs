@@ -48,7 +48,7 @@ defmodule Assembly.MixProject do
   defp deps do
     [
       {:amqp, "~> 2.0", override: true},
-      {:bottle, github: "system76/bottle", ref: "b84af908206f53234fe37d8d106ce93ee534b279"},
+      {:bottle, github: "system76/bottle", ref: "1a25526"},
       {:broadway_rabbitmq, "~> 0.7"},
       {:cachex, "~> 3.3"},
       {:cowlib, "~> 2.9.0", override: true},
