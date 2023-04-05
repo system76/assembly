@@ -17,6 +17,8 @@ defmodule Assembly.Build do
   @supervisor Assembly.BuildSupervisor
   @registry Assembly.BuildRegistry
 
+  @timeout_genserver 120_000
+
   @doc """
   Lists all builds that are not built.
 
@@ -29,7 +31,7 @@ defmodule Assembly.Build do
   def list_builds() do
     @supervisor
     |> DynamicSupervisor.which_children()
-    |> Stream.map(fn {_, pid, _type, _modules} -> GenServer.call(pid, :get_info) end)
+    |> Stream.map(fn {_, pid, _type, _modules} -> GenServer.call(pid, :get_info, @timeout_genserver) end)
     |> Enum.into([])
   end
 
@@ -63,7 +65,7 @@ defmodule Assembly.Build do
   @spec get_build(String.t()) :: Schemas.Build.t() | nil
   def get_build(id) do
     case Registry.lookup(@registry, to_string(id)) do
-      [{pid, _value}] -> GenServer.call(pid, :get_info)
+      [{pid, _value}] -> GenServer.call(pid, :get_info, @timeout_genserver)
       _ -> nil
     end
   catch
@@ -226,7 +228,7 @@ defmodule Assembly.Build do
   def get_component_demands() do
     @supervisor
     |> DynamicSupervisor.which_children()
-    |> Enum.map(fn {_, pid, _type, _modules} -> GenServer.call(pid, :get_demand) end)
+    |> Enum.map(fn {_, pid, _type, _modules} -> GenServer.call(pid, :get_demand, @timeout_genserver) end)
     |> Enum.reduce(%{}, &AdditiveMap.merge/2)
   end
 

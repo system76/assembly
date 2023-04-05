@@ -6,7 +6,7 @@ defmodule Assembly.MixProject do
       app: :assembly,
       aliases: aliases(),
       version: "0.1.0",
-      elixir: "~> 1.10",
+      elixir: "~> 1.14.3",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -48,10 +48,10 @@ defmodule Assembly.MixProject do
   defp deps do
     [
       {:amqp, "~> 2.0", override: true},
-      {:bottle, github: "system76/bottle", ref: "1a25526"},
+      {:bottle, github: "system76/bottle", ref: "cd3e55c3317b100678bbf16027505e22403996c1"},
       {:broadway_rabbitmq, "~> 0.7"},
       {:cachex, "~> 3.3"},
-      {:cowlib, "~> 2.9.0", override: true},
+      {:cowlib, "~> 2.12.0", override: true},
       {:credo, "~> 1.3", only: [:dev, :test]},
       {:decorator, "~> 1.2"},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
@@ -68,7 +68,8 @@ defmodule Assembly.MixProject do
       {:saxy, "~> 1.1"},
       {:spandex_datadog, "~> 1.1"},
       {:spandex, "~> 3.0.3"},
-      {:telemetry, "~> 0.4"}
+      {:telemetry, "~> 0.4"},
+      {:gun, "2.0.0", hex: :grpc_gun, override: true}
     ]
   end
 
