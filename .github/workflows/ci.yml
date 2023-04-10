@@ -159,7 +159,6 @@ jobs:
           path: |
             _build
             deps
-            priv/plts
 
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
