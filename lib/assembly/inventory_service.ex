@@ -14,7 +14,7 @@ defmodule Assembly.InventoryService do
     components = Enum.map(component_ids, &Component.new(id: &1))
     request = ListComponentAvailabilityRequest.new(components: components, request_id: Bottle.RequestId.write(:queue))
 
-    with {:ok, channel} <- InventoryServiceClient.channel(),
+    with channel <- InventoryServiceClient.channel(),
          {:ok, stream} <- Stub.list_component_availability(channel, request) do
       stream
     else
