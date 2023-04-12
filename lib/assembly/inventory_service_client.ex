@@ -39,7 +39,7 @@ defmodule Assembly.InventoryServiceClient do
     case init(%{}) do
       {:ok, channel} ->
         Logger.info("Assembly.InventoryServiceClient reconnected")
-        {:noreply, {:ok, channel}}
+        {:noreply, channel}
     end
   end
 
