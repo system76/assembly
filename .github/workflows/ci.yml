@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     container:
-      image: elixir:1.14-alpine
+      image: elixir:1.14-otp-25-alpine
 
     services:
       postgres:
@@ -74,7 +74,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     container:
-      image: elixir:1.14-alpine
+      image: elixir:1.14-otp-25-alpine
 
     steps:
       - name: Checkout Code
@@ -98,7 +98,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     container:
-      image: elixir:1.14-alpine
+      image: elixir:1.14-otp-25-alpine
 
     steps:
       - name: Checkout Code
