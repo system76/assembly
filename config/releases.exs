@@ -12,7 +12,6 @@ config :assembly, Assembly.Repo,
   hostname: config["DB_HOST"],
   port: config["DB_PORT"],
   ssl: true,
-  parameters: [sslmode: "require"],
   pool_size: config["DB_POOL"]
 
 config :assembly,
