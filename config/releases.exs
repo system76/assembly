@@ -24,6 +24,7 @@ config :assembly,
        password: config["RABBITMQ_PASSWORD"],
        host: config["RABBITMQ_HOST"],
        port: config["RABBITMQ_PORT"],
+       ssl: true,
        ssl_options: [verify: :verify_none]
      ]}
 
