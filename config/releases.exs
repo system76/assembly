@@ -11,6 +11,7 @@ config :assembly, Assembly.Repo,
   database: config["DB_NAME"],
   hostname: config["DB_HOST"],
   port: config["DB_PORT"],
+  ssl: true,
   parameters: [sslmode: "require"],
   pool_size: config["DB_POOL"]
 
@@ -24,7 +25,6 @@ config :assembly,
        password: config["RABBITMQ_PASSWORD"],
        host: config["RABBITMQ_HOST"],
        port: config["RABBITMQ_PORT"],
-       ssl: true,
        ssl_options: [verify: :verify_none]
      ]}
 
