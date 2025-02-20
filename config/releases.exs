@@ -11,6 +11,7 @@ config :assembly, Assembly.Repo,
   database: config["DB_NAME"],
   hostname: config["DB_HOST"],
   port: config["DB_PORT"],
+  ssl: false,
   pool_size: config["DB_POOL"]
 
 config :assembly,
